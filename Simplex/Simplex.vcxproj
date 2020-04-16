@@ -135,6 +135,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Bignum.cpp" />
+    <ClCompile Include="Fraction.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matrix.cpp" />
   </ItemGroup>
@@ -142,6 +144,8 @@
     <ClInclude Include="about.h">
       <FileType>CppForm</FileType>
     </ClInclude>
+    <ClInclude Include="Bignum.h" />
+    <ClInclude Include="Fraction.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="Input.h">
