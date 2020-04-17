@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <vector>
 #include <iostream>
+#include <sstream>
 #include <vcclr.h>
 #include "Fraction.h"
 //using namespace std;
@@ -20,8 +21,8 @@ private:
 	void Str2CharPtr(System::String^ str, char* chrPtr);
 	//void insertColumnVector(const double *X, int &c);
 	void swapRows(int& r1, int& r2);
-	Matrix cutMatrix(int& column, int& row) const;
-	void copyMatrix(const Matrix& M);
+	//Matrix cutMatrix(int& column, int& row) const;
+	//void copyMatrix(const Matrix& M);
 	//void makeRow_bySpinning(int &r, int &i);
 	int maxElementIndexInRow(int c, int r);
 public:
@@ -31,11 +32,11 @@ public:
 	~Matrix();
 
 	Fraction getElement(int row, int column);
-	double getEquivalent(int column);
+	//double getEquivalent(int column);
 	int getLength() const;
 	int getHeight() const;
 
-	Matrix& operator=(const Matrix& M);
+	/*Matrix& operator=(const Matrix& M);
 	Matrix operator/(const double& d) const;
 	Matrix operator/(Bignum second);
 	Matrix operator/=(const double& d);
@@ -43,7 +44,7 @@ public:
 
 	double determinant() const;
 	Matrix transpone() const;
-	Matrix randomize();
+	Matrix randomize();*/
 
 	//std::vector<int> Gauss_solution();
 	std::vector<int> Jorge_Gauss_solution();
@@ -52,7 +53,7 @@ public:
 	//int backIter(std::vector<int> &where, std::vector<double> &answer);
 
 	friend std::ostream& operator<<(std::ostream& out, const Matrix& M);
-	friend std::istream& operator>>(std::istream& in, Matrix& M);
+	//friend std::istream& operator>>(std::istream& in, Matrix& M);
 
-	void check_det_forLargeMatrix(int i, int k);
+	//void check_det_forLargeMatrix(int i, int k);
 };

@@ -95,11 +95,11 @@ void Matrix::swapRows(int& r1, int& r2)
 std::ostream& operator<<(std::ostream& out, const Matrix& M)
 {
 	out << std::fixed << std::setprecision(3);
-	for (int i = 0; i < M.rows; i++)
+	for (int i = 0; i < M.height; i++)
 	{
-		for (int j = 0; j < M.columns - 1; j++)
-			out << std::setw(8) << std::left << M.elements[i][j] << " ";
-		out << std::setw(8) << std::left << M.elements[i][M.columns - 1] << " | " << M.ecv[i] << std::endl;
+		for (int j = 0; j < M.length; j++)
+			out << std::setw(8) << std::left << M.data[i][j] << " ";
+		//out << std::setw(8) << std::left << M.data[i][M.length - 1] << " | " << M.ecv[i] << std::endl;
 
 	}
 	return out;
@@ -110,23 +110,24 @@ std::ostream& operator<<(std::ostream& out, const Matrix& M)
 std::vector<int> Matrix::Jorge_Gauss_solution() {
 	int i, j, r, c;
 
-	std::vector<int> where(columns, -1);            //to find arbitrary real number ( all col = 0)
-	for (c = 0, r = 0; columns > c && rows > r; ++c) {
+	std::vector<int> where(length, -1);            //to find arbitrary real number ( all col = 0)
+	for (c = 0, r = 0; length > c && height > r; ++c) {
 
 		int max_r_index = this->maxElementIndexInRow(c, r);
-		if (abs(elements[max_r_index][c]) < EPS)         //all elements are 0 + processed float num error
+		if (Fraction::abs(data[max_r_index][c]) < 
+				Fraction(Bignum(std::string(std::ostringstream(EPS).str())), Bignum("1"))) //all elements are 0 + processed float num error
 			continue;
 
 		swapRows(max_r_index, r);         // row with max el now first
 		where[c] = r;               //the col isn't zero one
 
-		for (i = 0; i < rows; ++i) {
+		for (i = 0; i < height; ++i) {
 			if (i != r) {
-				double div_lead = elements[i][c] / elements[r][c];      //the a(2,1)/a(1,1)
-				for (j = c; j < columns; ++j)
-					elements[i][j] -= elements[r][j] * div_lead;  //for each row below making first el = 0
+				Fraction div_lead = data[i][c] / data[r][c];      //the a(2,1)/a(1,1)
+				for (j = c; j < length; ++j)
+					data[i][j] -= data[r][j] * div_lead;  //for each row below making first el = 0
 
-				ecv[i] -= ecv[r] * div_lead;
+				//ecv[i] -= ecv[r] * div_lead;
 			}
 		}
 		++r;
