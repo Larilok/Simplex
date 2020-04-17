@@ -31,6 +31,7 @@ public:
     Fraction operator-(Fraction& frac);
     Fraction operator*(const Fraction& frac);
     Fraction operator/(Fraction& frac);
+    Fraction operator+=(Fraction& frac);
     Fraction operator-=(Fraction& frac);
     bool operator>(const Fraction& num);
     bool operator<( Fraction& num);

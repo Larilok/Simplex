@@ -1,6 +1,7 @@
 #include "MATRIX.h"
 
-#define EPS 0.00001
+#define EPS Fraction(Bignum(std::string(std::ostringstream(0.00001).str())), Bignum("1"))
+
 
 using namespace System;
 using namespace System::ComponentModel;
@@ -114,8 +115,7 @@ std::vector<int> Matrix::Jorge_Gauss_solution() {
 	for (c = 0, r = 0; length > c && height > r; ++c) {
 
 		int max_r_index = this->maxElementIndexInRow(c, r);
-		if (Fraction::abs(data[max_r_index][c]) < 
-				Fraction(Bignum(std::string(std::ostringstream(EPS).str())), Bignum("1"))) //all elements are 0 + processed float num error
+		if (Fraction::abs(data[max_r_index][c]) < EPS) //all elements are 0 + processed float num error
 			continue;
 
 		swapRows(max_r_index, r);         // row with max el now first
@@ -142,6 +142,39 @@ int Matrix::maxElementIndexInRow(int c, int r)
 		if (Fraction::abs(data[i][c]) > Fraction::abs(data[max_r][c]))        //selecting max in a column
 			max_r = i;
 	return max_r;
+}
+
+int Matrix::backIter(std::vector<int>& where, std::vector<Fraction>& answer) {
+
+	int r = height - 1, k = length - 1, i, j;
+	//answer.assign(length);
+
+	while (k >= 0 && r >= 0) {
+		if (where[r] != -1) {
+			answer[k] = data[r][length-1] / data[where[r]][k];	//diagonal elem(k) / b(k)
+
+			for (i = k + 1; i < length; i++)
+				answer[k] -= data[k][i] * answer[i] / data[k][k];  //insert x and solve
+		}
+		else if (data[k][length-1])throw std::exception("Error!\ndet = 0");
+		k--, r--;
+	}
+	for (i = 0; i < height; ++i) {       //checking is answer take a place at all
+		Fraction sum;
+		for (j = 0; j < length; ++j)
+			sum += answer[j] * data[i][j];     //solving left part
+
+		if (Fraction::abs(sum - data[i][length-1]) > EPS)            //something went complitely wrong
+			return 0;
+
+	}
+
+	for (i = 0; i < length; ++i)
+		if (where[i] == -1)
+			return 2;
+
+	return 1;
+
 }
 
 //to fill matrix easely
@@ -330,38 +363,7 @@ int Matrix::maxElementIndexInRow(int c, int r)
 //}
 
 
-//int Matrix::backIter(std::vector<int> &where ,std::vector<double> &answer) {
-//
-//	int r = rows - 1, k = columns - 1, i, j;
-//	answer.assign(columns, 0);
-//
-//	while (k >= 0 && r >= 0) {
-//		if (where[r] != -1 ) {
-//			answer[k] = ecv[r] / elements[where[r]][k];	//diagonal elem(k) / b(k)
-//
-//			for (i = k + 1; i < columns; i++)
-//				answer[k] -= elements[k][i] * answer[i] / elements[k][k];  //insert x and solve
-//		}
-//		else if(ecv[k])throw std::exception("Error!\ndet = 0");
-//		k--, r--;
-//	}
-//	for (i = 0; i < rows; ++i) {       //checking is answer take a place at all
-//		double sum = 0;
-//		for (j = 0; j < columns; ++j) 
-//			sum += answer[j] * elements[i][j];     //solving left part
-//
-//		if (abs(sum - ecv[i]) > EPS)            //something went complitely wrong
-//			return 0;
-//
-//	}
-//
-//	for (i = 0; i < columns; ++i)
-//		if (where[i] == -1)
-//			return 2;
-//
-//	return 1;
-//
-//}
+
 //std::vector<int> Matrix::Spinner_solution() {
 //	int i, r, c;
 //

@@ -50,7 +50,7 @@ public:
 	std::vector<int> Jorge_Gauss_solution();
 	//std::vector<int> Spinner_solution();
 
-	//int backIter(std::vector<int> &where, std::vector<double> &answer);
+	int backIter(std::vector<int> &where, std::vector<Fraction> &answer);
 
 	friend std::ostream& operator<<(std::ostream& out, const Matrix& M);
 	//friend std::istream& operator>>(std::istream& in, Matrix& M);

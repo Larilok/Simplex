@@ -142,6 +142,11 @@ Fraction Fraction::operator/(Fraction& frac) {
     return result;
 }
 
+Fraction Fraction::operator+=(Fraction& frac)
+{
+	return *this + frac;
+}
+
 Fraction Fraction::operator-=(Fraction& frac)
 {
     return *this - frac;
