@@ -142,6 +142,11 @@ Fraction Fraction::operator/(Fraction& frac) {
     return result;
 }
 
+Fraction Fraction::operator-=(Fraction& frac)
+{
+    return *this - frac;
+}
+
 bool Fraction::operator>(const Fraction& num)
 {
     if (this->isPositive == num.isPositive) {
