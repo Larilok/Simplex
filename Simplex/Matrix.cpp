@@ -138,7 +138,7 @@ int Matrix::maxElementIndexInRow(int c, int r)
 {
 	int max_r = r;
 	for (int i = r; i < length - 1; ++i)
-		if (data[i][c].setIsPositive(1) > data[max_r][c].setIsPositive(1))        //selecting max in a column
+		if (Fraction::abs(data[i][c]) > Fraction::abs(data[max_r][c]))        //selecting max in a column
 			max_r = i;
 	return max_r;
 }

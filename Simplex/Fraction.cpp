@@ -142,12 +142,36 @@ Fraction Fraction::operator/(Fraction& frac) {
     return result;
 }
 
+bool Fraction::operator>(const Fraction& num)
+{
+    if (this->isPositive == num.isPositive) {
+        if (this->numerator * num.denominator > this->denominator * num.numerator) return true;
+        else return false;
+    }
+    else if (this->isPositive && !num.isPositive) {
+        return true;
+    }
+    return false;//if this is negative && num is positive
+}
+
+bool Fraction::operator<(Fraction& num)
+{
+    return num > *this;
+}
+
 bool Fraction::getIsPositive() const {
     return isPositive;
 }
 
 void Fraction::setIsPositive(bool isPositive) {
     Fraction::isPositive = isPositive;
+}
+
+Fraction Fraction::abs(const Fraction& num)
+{
+    Fraction copy(num);
+    copy.isPositive = true;
+    return copy;
 }
 
 const Bignum& Fraction::getNumerator() const {
