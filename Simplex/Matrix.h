@@ -15,7 +15,6 @@ class Matrix
 private:
 	std::vector<std::vector<Fraction>> data;
 
-	Matrix(const Matrix& M);
 	void Str2CharPtr(System::String^ str, char* chrPtr);
 	//void insertColumnVector(const double *X, int &c);
 	void swapRows(int& r1, int& r2);
@@ -26,6 +25,7 @@ private:
 public:
 	Matrix() = default;
 	Matrix(const int& c, const int& r);
+	Matrix(const Matrix& M);
 	Matrix copy(System::Windows::Forms::DataGridView^ restrictions_table, System::Windows::Forms::DataGridView^ targetFunction);
 	~Matrix();
 

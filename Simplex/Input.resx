@@ -423,70 +423,70 @@
   <data name="groupBox2.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Bottom, Left</value>
   </data>
-  <data name="rb2.AutoSize" type="System.Boolean, mscorlib">
+  <data name="min_b.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
-  <data name="rb2.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+  <data name="min_b.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
   </data>
-  <data name="rb2.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="min_b.Location" type="System.Drawing.Point, System.Drawing">
     <value>13, 42</value>
   </data>
-  <data name="rb2.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+  <data name="min_b.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>2, 2, 2, 2</value>
   </data>
-  <data name="rb2.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="min_b.Size" type="System.Drawing.Size, System.Drawing">
     <value>48, 21</value>
   </data>
-  <data name="rb2.TabIndex" type="System.Int32, mscorlib">
+  <data name="min_b.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
   </data>
-  <data name="rb2.Text" xml:space="preserve">
+  <data name="min_b.Text" xml:space="preserve">
     <value>min</value>
   </data>
-  <data name="&gt;&gt;rb2.Name" xml:space="preserve">
-    <value>rb2</value>
+  <data name="&gt;&gt;min_b.Name" xml:space="preserve">
+    <value>min_b</value>
   </data>
-  <data name="&gt;&gt;rb2.Type" xml:space="preserve">
+  <data name="&gt;&gt;min_b.Type" xml:space="preserve">
     <value>System.Windows.Forms.RadioButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;rb2.Parent" xml:space="preserve">
+  <data name="&gt;&gt;min_b.Parent" xml:space="preserve">
     <value>groupBox2</value>
   </data>
-  <data name="&gt;&gt;rb2.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;min_b.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
-  <data name="rb1.AutoSize" type="System.Boolean, mscorlib">
+  <data name="max_b.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
-  <data name="rb1.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+  <data name="max_b.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
   </data>
-  <data name="rb1.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="max_b.Location" type="System.Drawing.Point, System.Drawing">
     <value>13, 19</value>
   </data>
-  <data name="rb1.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+  <data name="max_b.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>2, 2, 2, 2</value>
   </data>
-  <data name="rb1.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="max_b.Size" type="System.Drawing.Size, System.Drawing">
     <value>51, 21</value>
   </data>
-  <data name="rb1.TabIndex" type="System.Int32, mscorlib">
+  <data name="max_b.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
   </data>
-  <data name="rb1.Text" xml:space="preserve">
+  <data name="max_b.Text" xml:space="preserve">
     <value>max</value>
   </data>
-  <data name="&gt;&gt;rb1.Name" xml:space="preserve">
-    <value>rb1</value>
+  <data name="&gt;&gt;max_b.Name" xml:space="preserve">
+    <value>max_b</value>
   </data>
-  <data name="&gt;&gt;rb1.Type" xml:space="preserve">
+  <data name="&gt;&gt;max_b.Type" xml:space="preserve">
     <value>System.Windows.Forms.RadioButton, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;rb1.Parent" xml:space="preserve">
+  <data name="&gt;&gt;max_b.Parent" xml:space="preserve">
     <value>groupBox2</value>
   </data>
-  <data name="&gt;&gt;rb1.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;max_b.ZOrder" xml:space="preserve">
     <value>1</value>
   </data>
   <data name="groupBox2.Font" type="System.Drawing.Font, System.Drawing">

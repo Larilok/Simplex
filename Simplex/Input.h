@@ -2,6 +2,7 @@
 #include "Matrix.h"
 #include "answer.h"
 #include "about.h"
+#include "Simplex.h"
 
 namespace Simplex {
 
@@ -54,9 +55,11 @@ namespace Simplex {
 	private: System::Windows::Forms::DataGridView^ targetFunction;
 
 	private: System::Windows::Forms::GroupBox^ groupBox2;
-	private: System::Windows::Forms::RadioButton^ rb2;
+	private: System::Windows::Forms::RadioButton^ min_b;
 
-	private: System::Windows::Forms::RadioButton^ rb1;
+	private: System::Windows::Forms::RadioButton^ max_b;
+
+
 
 	private: System::Windows::Forms::Label^ label4;
 
@@ -85,8 +88,8 @@ namespace Simplex {
 			   this->label1 = (gcnew System::Windows::Forms::Label());
 			   this->targetFunction = (gcnew System::Windows::Forms::DataGridView());
 			   this->groupBox2 = (gcnew System::Windows::Forms::GroupBox());
-			   this->rb2 = (gcnew System::Windows::Forms::RadioButton());
-			   this->rb1 = (gcnew System::Windows::Forms::RadioButton());
+			   this->min_b = (gcnew System::Windows::Forms::RadioButton());
+			   this->max_b = (gcnew System::Windows::Forms::RadioButton());
 			   this->label4 = (gcnew System::Windows::Forms::Label());
 			   (cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->VariablesNum))->BeginInit();
 			   (cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->restrictions_table))->BeginInit();
@@ -219,24 +222,24 @@ namespace Simplex {
 			   // groupBox2
 			   // 
 			   resources->ApplyResources(this->groupBox2, L"groupBox2");
-			   this->groupBox2->Controls->Add(this->rb2);
-			   this->groupBox2->Controls->Add(this->rb1);
+			   this->groupBox2->Controls->Add(this->min_b);
+			   this->groupBox2->Controls->Add(this->max_b);
 			   this->groupBox2->Name = L"groupBox2";
 			   this->groupBox2->TabStop = false;
 			   // 
-			   // rb2
+			   // min_b
 			   // 
-			   resources->ApplyResources(this->rb2, L"rb2");
-			   this->rb2->Name = L"rb2";
-			   this->rb2->UseVisualStyleBackColor = true;
+			   resources->ApplyResources(this->min_b, L"min_b");
+			   this->min_b->Name = L"min_b";
+			   this->min_b->UseVisualStyleBackColor = true;
 			   // 
-			   // rb1
+			   // max_b
 			   // 
-			   resources->ApplyResources(this->rb1, L"rb1");
-			   this->rb1->Checked = true;
-			   this->rb1->Name = L"rb1";
-			   this->rb1->TabStop = true;
-			   this->rb1->UseVisualStyleBackColor = true;
+			   resources->ApplyResources(this->max_b, L"max_b");
+			   this->max_b->Checked = true;
+			   this->max_b->Name = L"max_b";
+			   this->max_b->TabStop = true;
+			   this->max_b->UseVisualStyleBackColor = true;
 			   // 
 			   // label4
 			   // 
@@ -362,18 +365,17 @@ namespace Simplex {
 	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
 		Matrix m(restrictions_table->RowCount, restrictions_table->ColumnCount);
 		m.copy(restrictions_table, targetFunction);
-		if (rb1->Checked) {
-			//auto where = m.Gauss_solution();
-
-			//Answer^ ans = gcnew Answer(m, where, rb1->Text);
-			//ans->Show();
+		if (min_b->Checked) {
+			simplex_solution(m, 0);
 		}
 
-		if (rb2->Checked) {
-			auto where = m.Jorge_Gauss_solution();
+		if (max_b->Checked) {
+			simplex_solution(m, 1);
 
-			Answer^ ans = gcnew Answer(m, where, rb2->Text);
-			ans->Show();
+			//auto where = m.Jorge_Gauss_solution();
+
+			//Answer^ ans = gcnew Answer(m, where, rb2->Text);
+			//ans->Show();
 		}
 
 	}
