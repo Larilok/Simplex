@@ -15,20 +15,20 @@ Fraction Matrix::getElement(int row, int column)
 	return data[row][column];
 }
 
-int Matrix::getLength() const
+size_t Matrix::getLength() const
 {
-	return length;
+	return data[0].size();
 }
 
-int Matrix::getHeight() const
+size_t Matrix::getHeight() const
 {
-	return height;
+	return data.size();
 }
 
-//double Matrix::getEquivalent(int row)
-//{
-//	return ecv[row];
-//}
+Fraction Matrix::getEquivalent(int row)
+{
+	return data[row][getLength()];
+}
 
 
 void Matrix::Str2CharPtr(System::String^ str, char* chrPtr)
@@ -62,13 +62,13 @@ Matrix Matrix::copy(System::Windows::Forms::DataGridView ^ restrictions_table, S
 
 Matrix::Matrix() : Matrix(1, 1) {}
 
-Matrix::Matrix(const int& c, const int& r) : data(r, std::vector<Fraction>(c, Fraction(Bignum("0"), Bignum("1")))), length(c), height(r) {}
+Matrix::Matrix(const int& c, const int& r) : data(r, std::vector<Fraction>(c, Fraction(Bignum("0"), Bignum("1")))){}
 
-Matrix::Matrix(const Matrix& M) : height(M.height), length(M.length)
+Matrix::Matrix(const Matrix& M)
 {
-	data = std::vector<std::vector<Fraction>>(height, std::vector<Fraction>(length));
-	for (int i = 0; i < height; i++) {
-		for (int j = 0; j < length; j++)
+	data = std::vector<std::vector<Fraction>>(getHeight(), std::vector<Fraction>(getLength()));
+	for (int i = 0; i < getHeight(); i++) {
+		for (int j = 0; j < getLength(); j++)
 			data[i][j] = M.data[i][j];
 	}
 }
@@ -83,7 +83,7 @@ Matrix::~Matrix()
 void Matrix::swapRows(int& r1, int& r2)
 {
 	Fraction temp;
-	for (int i = 0; i < length; i++)
+	for (int i = 0; i < getLength(); i++)
 	{
 		temp = data[r1][i];
 		data[r1][i] = data[r2][i];
@@ -96,11 +96,11 @@ void Matrix::swapRows(int& r1, int& r2)
 std::ostream& operator<<(std::ostream& out, const Matrix& M)
 {
 	out << std::fixed << std::setprecision(3);
-	for (int i = 0; i < M.height; i++)
+	for (int i = 0; i < M.getHeight(); i++)
 	{
-		for (int j = 0; j < M.length; j++)
+		for (int j = 0; j < M.getLength(); j++)
 			out << std::setw(8) << std::left << M.data[i][j] << " ";
-		//out << std::setw(8) << std::left << M.data[i][M.length - 1] << " | " << M.ecv[i] << std::endl;
+		//out << std::setw(8) << std::left << M.data[i][M.getLength() - 1] << " | " << M.ecv[i] << std::endl;
 
 	}
 	return out;
@@ -111,8 +111,8 @@ std::ostream& operator<<(std::ostream& out, const Matrix& M)
 std::vector<int> Matrix::Jorge_Gauss_solution() {
 	int i, j, r, c;
 
-	std::vector<int> where(length, -1);            //to find arbitrary real number ( all col = 0)
-	for (c = 0, r = 0; length > c && height > r; ++c) {
+	std::vector<int> where(getLength(), -1);            //to find arbitrary real number ( all col = 0)
+	for (c = 0, r = 0; getLength() > c && getHeight() > r; ++c) {
 
 		int max_r_index = this->maxElementIndexInRow(c, r);
 		if (Fraction::abs(data[max_r_index][c]) < EPS) //all elements are 0 + processed float num error
@@ -121,10 +121,10 @@ std::vector<int> Matrix::Jorge_Gauss_solution() {
 		swapRows(max_r_index, r);         // row with max el now first
 		where[c] = r;               //the col isn't zero one
 
-		for (i = 0; i < height; ++i) {
+		for (i = 0; i < getHeight(); ++i) {
 			if (i != r) {
 				Fraction div_lead = data[i][c] / data[r][c];      //the a(2,1)/a(1,1)
-				for (j = c; j < length; ++j)
+				for (j = c; j < getLength(); ++j)
 					data[i][j] -= data[r][j] * div_lead;  //for each row below making first el = 0
 
 				//ecv[i] -= ecv[r] * div_lead;
@@ -138,7 +138,7 @@ std::vector<int> Matrix::Jorge_Gauss_solution() {
 int Matrix::maxElementIndexInRow(int c, int r)
 {
 	int max_r = r;
-	for (int i = r; i < length - 1; ++i)
+	for (int i = r; i < getLength() - 1; ++i)
 		if (Fraction::abs(data[i][c]) > Fraction::abs(data[max_r][c]))        //selecting max in a column
 			max_r = i;
 	return max_r;
@@ -146,30 +146,30 @@ int Matrix::maxElementIndexInRow(int c, int r)
 
 int Matrix::backIter(std::vector<int>& where, std::vector<Fraction>& answer) {
 
-	int r = height - 1, k = length - 1, i, j;
-	//answer.assign(length);
+	int r = getHeight() - 1, k = getLength() - 1, i, j;
+	//answer.assign(getLength());
 
 	while (k >= 0 && r >= 0) {
 		if (where[r] != -1) {
-			answer[k] = data[r][length-1] / data[where[r]][k];	//diagonal elem(k) / b(k)
+			answer[k] = data[r][getLength()-1] / data[where[r]][k];	//diagonal elem(k) / b(k)
 
-			for (i = k + 1; i < length; i++)
+			for (i = k + 1; i < getLength(); i++)
 				answer[k] -= data[k][i] * answer[i] / data[k][k];  //insert x and solve
 		}
-		else if (data[k][length-1])throw std::exception("Error!\ndet = 0");
+		else if (data[k][getLength()-1])throw std::exception("Error!\ndet = 0");
 		k--, r--;
 	}
-	for (i = 0; i < height; ++i) {       //checking is answer take a place at all
+	for (i = 0; i < getHeight(); ++i) {       //checking is answer take a place at all
 		Fraction sum;
-		for (j = 0; j < length; ++j)
+		for (j = 0; j < getLength(); ++j)
 			sum += answer[j] * data[i][j];     //solving left part
 
-		if (Fraction::abs(sum - data[i][length-1]) > EPS)            //something went complitely wrong
+		if (Fraction::abs(sum - data[i][getLength()-1]) > EPS)            //something went complitely wrong
 			return 0;
 
 	}
 
-	for (i = 0; i < length; ++i)
+	for (i = 0; i < getLength(); ++i)
 		if (where[i] == -1)
 			return 2;
 

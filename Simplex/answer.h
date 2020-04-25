@@ -43,47 +43,48 @@ namespace Simplex {
 	private: System::Windows::Forms::ToolStripMenuItem^  saveToFileToolStripMenuItem;
 	public:		 Answer(Matrix &m, std::vector<int>& where, System::String^ name)
 		{
-			InitializeComponent();
-			this->Text = name;
-			this->matrix->ColumnCount = m.getColumns() + 1;
-			this->matrix->RowCount = m.getColumns();
+		//	InitializeComponent();
+		//	this->Text = name;
+		//	//this->matrix->ColumnCount = m.getColumns() + 1;
+		//	this->matrix->ColumnCount = m.getLength();
+		//	this->matrix->RowCount = m.getHeight();
 
-			for (int i = 0; i < matrix->RowCount; i++) {
-				for (int j = 0; j < matrix->ColumnCount - 1; j++)
-					matrix->Rows[i]->Cells[j]->Value = System::Convert::ToString(Math::Round(m.getElement(i, j), 3));
-				matrix->Rows[i]->Cells[matrix->Columns->Count - 1]->Value = System::Convert::ToString(Math::Round(m.getEquivalent(i), 3));
-			}
+		//	for (int i = 0; i < matrix->RowCount; i++) {
+		//		for (int j = 0; j < matrix->ColumnCount - 1; j++)
+		//			matrix->Rows[i]->Cells[j]->Value = m.getElement(i, j);
+		//		matrix->Rows[i]->Cells[matrix->Columns->Count - 1]->Value = m.getElement(i, m.getLength - 1);
+		//	}
 
-			for (int i = 0; i < matrix->ColumnCount - 1; i++) {
-				matrix->Columns[i]->Name = "x(" + Convert::ToString(i + 1) + ")";
-			}
-			matrix->Columns[matrix->ColumnCount - 1]->Name = "b";
-			matrix->AutoResizeColumns();
+		//	for (int i = 0; i < matrix->ColumnCount - 1; i++) {
+		//		matrix->Columns[i]->Name = "x(" + Convert::ToString(i + 1) + ")";
+		//	}
+		//	matrix->Columns[matrix->ColumnCount - 1]->Name = "b";
+		//	matrix->AutoResizeColumns();
 
-			try {
-				std::vector<double> answer;
-				int type = m.backIter(where ,answer);
-				int counter = 0;
-				if (type == 2) {
-					std::vector<int> emptyIndexesHolder;
-					for (int i = 0; i < answer.size(); i++) {
-						if (where[i] == -1) RTB->Text += "x(" + Convert::ToString(++counter) + ") = " + "arbitrary real number\n";
-						else RTB->Text += "x(" + Convert::ToString(++counter) + ") = " + Convert::ToString(Math::Round(answer[i], 3)) + "\n";
-					}
-				}
-				else if (type) {
-					for (auto el : answer) {
-						RTB->Text += "x(" + Convert::ToString(++counter) + ") = " + Convert::ToString(Math::Round(el, 3)) + "\n";
-					}
-				}
-				else RTB->Text = "You're a DARK MAGE, how in the world you broke my program";
-			}
-			catch (std::exception e) {
-				RTB->Text = Convert::ToString(e.what());
-			}
-			catch (...) {
-				RTB->Text = "Unexpected error";
-			}
+		//	try {
+		//		std::vector<Fraction> answer;
+		//		int type = m.backIter(where ,answer);
+		//		int counter = 0;
+		//		if (type == 2) {
+		//			std::vector<int> emptyIndexesHolder;
+		//			for (int i = 0; i < answer.size(); i++) {
+		//				if (where[i] == -1) RTB->Text += "x(" + Convert::ToString(++counter) + ") = " + "arbitrary real number\n";
+		//				else RTB->Text += "x(" + Convert::ToString(++counter) + ") = " + Convert::ToString(answer[i]) + "\n";
+		//			}
+		//		}
+		//		else if (type) {
+		//			for (auto el : answer) {
+		//				RTB->Text += "x(" + Convert::ToString(++counter) + ") = " + Convert::ToString(el) + "\n";
+		//			}
+		//		}
+		//		else RTB->Text = "You're a DARK MAGE, how in the world you broke my program";
+		//	}
+		//	catch (std::exception e) {
+		//		RTB->Text = Convert::ToString(e.what());
+		//	}
+		//	catch (...) {
+		//		RTB->Text = "Unexpected error";
+		//	}
 			//
 			//TODO: Add the constructor code here
 			//
@@ -273,7 +274,7 @@ private: System::Void infoToolStripMenuItem_Click(System::Object^  sender, Syste
 	info->ShowDialog();
 }
 private: System::Void saveToFileToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
-	std::ofstream out;
+	/*std::ofstream out;
 	char outputFile[20];
 	Str2CharPtr(this->Text, outputFile);
 	
@@ -298,7 +299,7 @@ private: System::Void saveToFileToolStripMenuItem_Click(System::Object^  sender,
 	s = outt.str();
 	out.open(outFile+ "("+ s +")"+".txt", std::fstream::out);
 	Str2CharPtr(this->RTB->Text, answer);
-	out << "FINAL MATRIX\n" << m <<"\n Answer\n"<< answer;
+	out << "FINAL MATRIX\n" << m <<"\n Answer\n"<< answer;*/
 }
 };
 }

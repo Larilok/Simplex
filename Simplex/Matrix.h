@@ -14,8 +14,6 @@ class Matrix
 {
 private:
 	std::vector<std::vector<Fraction>> data;
-	int length;
-	int height;
 
 	Matrix(const Matrix& M);
 	void Str2CharPtr(System::String^ str, char* chrPtr);
@@ -32,9 +30,9 @@ public:
 	~Matrix();
 
 	Fraction getElement(int row, int column);
-	//double getEquivalent(int column);
-	int getLength() const;
-	int getHeight() const;
+	Fraction getEquivalent(int column);
+	size_t getLength() const;
+	size_t getHeight() const;
 
 	/*Matrix& operator=(const Matrix& M);
 	Matrix operator/(const double& d) const;

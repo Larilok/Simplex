@@ -43,10 +43,10 @@ namespace Simplex {
 	private: System::Windows::Forms::MenuStrip^ menuStrip1;
 	private: System::Windows::Forms::ToolStripMenuItem^ infoToolStripMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^ aboutToolStripMenuItem;
-	private: System::Windows::Forms::RadioButton^ rb1;
-	private: System::Windows::Forms::RadioButton^ rb2;
-	private: System::Windows::Forms::RadioButton^ rb3;
-	private: System::Windows::Forms::GroupBox^ groupBox1;
+
+
+
+
 	private: System::Windows::Forms::NumericUpDown^ VariablesNum;
 	private: System::Windows::Forms::NumericUpDown^ RestrictionsNum;
 	private: System::Windows::Forms::Label^ label3;
@@ -54,8 +54,11 @@ namespace Simplex {
 	private: System::Windows::Forms::DataGridView^ targetFunction;
 
 	private: System::Windows::Forms::GroupBox^ groupBox2;
-	private: System::Windows::Forms::RadioButton^ radioButton1;
-	private: System::Windows::Forms::RadioButton^ radioButton3;
+	private: System::Windows::Forms::RadioButton^ rb2;
+
+	private: System::Windows::Forms::RadioButton^ rb1;
+
+	private: System::Windows::Forms::Label^ label4;
 
 	private: System::ComponentModel::IContainer^ components;
 
@@ -77,21 +80,17 @@ namespace Simplex {
 			   this->menuStrip1 = (gcnew System::Windows::Forms::MenuStrip());
 			   this->infoToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
 			   this->aboutToolStripMenuItem = (gcnew System::Windows::Forms::ToolStripMenuItem());
-			   this->rb1 = (gcnew System::Windows::Forms::RadioButton());
-			   this->rb2 = (gcnew System::Windows::Forms::RadioButton());
-			   this->rb3 = (gcnew System::Windows::Forms::RadioButton());
-			   this->groupBox1 = (gcnew System::Windows::Forms::GroupBox());
 			   this->RestrictionsNum = (gcnew System::Windows::Forms::NumericUpDown());
 			   this->label3 = (gcnew System::Windows::Forms::Label());
 			   this->label1 = (gcnew System::Windows::Forms::Label());
 			   this->targetFunction = (gcnew System::Windows::Forms::DataGridView());
 			   this->groupBox2 = (gcnew System::Windows::Forms::GroupBox());
-			   this->radioButton1 = (gcnew System::Windows::Forms::RadioButton());
-			   this->radioButton3 = (gcnew System::Windows::Forms::RadioButton());
+			   this->rb2 = (gcnew System::Windows::Forms::RadioButton());
+			   this->rb1 = (gcnew System::Windows::Forms::RadioButton());
+			   this->label4 = (gcnew System::Windows::Forms::Label());
 			   (cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->VariablesNum))->BeginInit();
 			   (cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->restrictions_table))->BeginInit();
 			   this->menuStrip1->SuspendLayout();
-			   this->groupBox1->SuspendLayout();
 			   (cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->RestrictionsNum))->BeginInit();
 			   (cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->targetFunction))->BeginInit();
 			   this->groupBox2->SuspendLayout();
@@ -174,35 +173,6 @@ namespace Simplex {
 			   resources->ApplyResources(this->aboutToolStripMenuItem, L"aboutToolStripMenuItem");
 			   this->aboutToolStripMenuItem->Click += gcnew System::EventHandler(this, &Input::aboutToolStripMenuItem_Click);
 			   // 
-			   // rb1
-			   // 
-			   resources->ApplyResources(this->rb1, L"rb1");
-			   this->rb1->Checked = true;
-			   this->rb1->Name = L"rb1";
-			   this->rb1->TabStop = true;
-			   this->rb1->UseVisualStyleBackColor = true;
-			   // 
-			   // rb2
-			   // 
-			   resources->ApplyResources(this->rb2, L"rb2");
-			   this->rb2->Name = L"rb2";
-			   this->rb2->UseVisualStyleBackColor = true;
-			   // 
-			   // rb3
-			   // 
-			   resources->ApplyResources(this->rb3, L"rb3");
-			   this->rb3->Name = L"rb3";
-			   this->rb3->UseVisualStyleBackColor = true;
-			   // 
-			   // groupBox1
-			   // 
-			   resources->ApplyResources(this->groupBox1, L"groupBox1");
-			   this->groupBox1->Controls->Add(this->rb3);
-			   this->groupBox1->Controls->Add(this->rb2);
-			   this->groupBox1->Controls->Add(this->rb1);
-			   this->groupBox1->Name = L"groupBox1";
-			   this->groupBox1->TabStop = false;
-			   // 
 			   // RestrictionsNum
 			   // 
 			   resources->ApplyResources(this->RestrictionsNum, L"RestrictionsNum");
@@ -249,24 +219,29 @@ namespace Simplex {
 			   // groupBox2
 			   // 
 			   resources->ApplyResources(this->groupBox2, L"groupBox2");
-			   this->groupBox2->Controls->Add(this->radioButton1);
-			   this->groupBox2->Controls->Add(this->radioButton3);
+			   this->groupBox2->Controls->Add(this->rb2);
+			   this->groupBox2->Controls->Add(this->rb1);
 			   this->groupBox2->Name = L"groupBox2";
 			   this->groupBox2->TabStop = false;
 			   // 
-			   // radioButton1
+			   // rb2
 			   // 
-			   resources->ApplyResources(this->radioButton1, L"radioButton1");
-			   this->radioButton1->Name = L"radioButton1";
-			   this->radioButton1->UseVisualStyleBackColor = true;
+			   resources->ApplyResources(this->rb2, L"rb2");
+			   this->rb2->Name = L"rb2";
+			   this->rb2->UseVisualStyleBackColor = true;
 			   // 
-			   // radioButton3
+			   // rb1
 			   // 
-			   resources->ApplyResources(this->radioButton3, L"radioButton3");
-			   this->radioButton3->Checked = true;
-			   this->radioButton3->Name = L"radioButton3";
-			   this->radioButton3->TabStop = true;
-			   this->radioButton3->UseVisualStyleBackColor = true;
+			   resources->ApplyResources(this->rb1, L"rb1");
+			   this->rb1->Checked = true;
+			   this->rb1->Name = L"rb1";
+			   this->rb1->TabStop = true;
+			   this->rb1->UseVisualStyleBackColor = true;
+			   // 
+			   // label4
+			   // 
+			   resources->ApplyResources(this->label4, L"label4");
+			   this->label4->Name = L"label4";
 			   // 
 			   // Input
 			   // 
@@ -274,11 +249,11 @@ namespace Simplex {
 			   this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			   this->BackColor = System::Drawing::SystemColors::ControlLightLight;
 			   this->Controls->Add(this->button1);
+			   this->Controls->Add(this->label4);
 			   this->Controls->Add(this->label2);
 			   this->Controls->Add(this->targetFunction);
 			   this->Controls->Add(this->restrictions_table);
 			   this->Controls->Add(this->groupBox2);
-			   this->Controls->Add(this->groupBox1);
 			   this->Controls->Add(this->label3);
 			   this->Controls->Add(this->label1);
 			   this->Controls->Add(this->RestrictionsNum);
@@ -291,8 +266,6 @@ namespace Simplex {
 			   (cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->restrictions_table))->EndInit();
 			   this->menuStrip1->ResumeLayout(false);
 			   this->menuStrip1->PerformLayout();
-			   this->groupBox1->ResumeLayout(false);
-			   this->groupBox1->PerformLayout();
 			   (cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->RestrictionsNum))->EndInit();
 			   (cli::safe_cast<System::ComponentModel::ISupportInitialize^>(this->targetFunction))->EndInit();
 			   this->groupBox2->ResumeLayout(false);
@@ -387,13 +360,13 @@ namespace Simplex {
 
 
 	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
-		Matrix m(restrictions_table->RowCount, restrictions_table->ColumnCount - 1);
-		m.copy(restrictions_table);
+		Matrix m(restrictions_table->RowCount, restrictions_table->ColumnCount);
+		m.copy(restrictions_table, targetFunction);
 		if (rb1->Checked) {
-			auto where = m.Gauss_solution();
+			//auto where = m.Gauss_solution();
 
-			Answer^ ans = gcnew Answer(m, where, rb1->Text);
-			ans->Show();
+			//Answer^ ans = gcnew Answer(m, where, rb1->Text);
+			//ans->Show();
 		}
 
 		if (rb2->Checked) {
@@ -403,12 +376,6 @@ namespace Simplex {
 			ans->Show();
 		}
 
-		if (rb3->Checked) {
-			auto where = m.Spinner_solution();
-
-			Answer^ ans = gcnew Answer(m, where, rb3->Text);
-			ans->Show();
-		}
 	}
 		   //private: System::Void restrictions_table_CellValidating(System::Object^  sender, System::Windows::Forms::DataGridViewCellValidatingEventArgs^  e) {
 		   //	DataGridView^ view = (DataGridView^)sender;
