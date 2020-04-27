@@ -363,8 +363,7 @@ namespace Simplex {
 
 
 	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
-		Matrix m(restrictions_table->RowCount, restrictions_table->ColumnCount);
-		m.copy(restrictions_table, targetFunction);
+		Matrix m(restrictions_table, targetFunction);
 		if (min_b->Checked) {
 			simplex_solution(m, 0);
 		}

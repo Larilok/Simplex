@@ -26,7 +26,7 @@ public:
 	Matrix() = default;
 	Matrix(const int& c, const int& r);
 	Matrix(const Matrix& M);
-	Matrix copy(System::Windows::Forms::DataGridView^ restrictions_table, System::Windows::Forms::DataGridView^ targetFunction);
+	Matrix(System::Windows::Forms::DataGridView^ restrictions_table, System::Windows::Forms::DataGridView^ targetFunction);
 	~Matrix();
 
 	Fraction getElement(int row, int column);

@@ -43,7 +43,7 @@ void Matrix::Str2CharPtr(System::String^ str, char* chrPtr)
 	wcstombs_s(&convertedChars, chrPtr, sizeInBytes, wchPtr, sizeInBytes);
 }
 
-Matrix Matrix::copy(System::Windows::Forms::DataGridView ^ restrictions_table, System::Windows::Forms::DataGridView^ targetFunction)
+Matrix::Matrix(System::Windows::Forms::DataGridView^ restrictions_table, System::Windows::Forms::DataGridView^ targetFunction)
 {
 	char* buffer;
 	for (size_t i = 0; i < targetFunction->ColumnCount; i++)
@@ -72,6 +72,8 @@ Matrix::Matrix(const Matrix& M)
 			data[i][j] = M.data[i][j];
 	}
 }
+
+
 
 Matrix::~Matrix()
 {
