@@ -2,7 +2,6 @@
 
 #define EPS Fraction(Bignum(std::string(std::ostringstream(0.00001).str())), Bignum("1"))
 
-
 using namespace System;
 using namespace System::ComponentModel;
 using namespace System::Collections;
@@ -15,12 +14,12 @@ Fraction Matrix::getElement(int row, int column)
 	return data[row][column];
 }
 
-size_t Matrix::getLength() const
+std::size_t Matrix::getLength() const
 {
 	return data[0].size();
 }
 
-size_t Matrix::getHeight() const
+std::size_t Matrix::getHeight() const
 {
 	return data.size();
 }
@@ -37,27 +36,66 @@ void Matrix::Str2CharPtr(System::String^ str, char* chrPtr)
 	pin_ptr<const wchar_t> wchPtr = PtrToStringChars(str);
 
 	// Convert wchar_t* to char*
-	size_t  convertedChars = 0;
-	size_t  sizeInBytes = ((str->Length + 1) * 2);
+	std::size_t  convertedChars = 0;
+	std::size_t  sizeInBytes = ((str->Length + 1) * 2);
 
 	wcstombs_s(&convertedChars, chrPtr, sizeInBytes, wchPtr, sizeInBytes);
 }
 
-Matrix::Matrix(System::Windows::Forms::DataGridView^ restrictions_table, System::Windows::Forms::DataGridView^ targetFunction)
+void Matrix::insert_nonbasic_variable_simplex(
+	std::vector<size_t>& variables,
+	std::vector<size_t>& basis,
+	Var type, const char* value, size_t &current_row)
 {
-	char* buffer;
-	for (size_t i = 0; i < targetFunction->ColumnCount; i++)
+	variables.push_back(type);
+	if(type == Var::Surplus) basis.push_back(variables.size() - 1);
+
+	for (size_t k = 0; k < data.size(); k++)
 	{
+		if (k == current_row) data[k].push_back(Fraction(Bignum(value), Bignum("1")));
+		else data[k].push_back(Fraction(Bignum("0"), Bignum("1")));
+	}
+}
+
+Matrix::Matrix(System::Windows::Forms::DataGridView^ restrictions_table,
+	System::Windows::Forms::DataGridView^ targetFunction,
+	std::vector<size_t>& variables,
+	std::vector<size_t>& basis): 
+		data(restrictions_table->RowCount+1, std::vector<Fraction>(targetFunction->ColumnCount-1))
+{
+	char* buffer;	//buffer to save value from input
+
+	//fills first row with values of targerFunction
+	for (std::size_t i = 0; i < targetFunction->ColumnCount; i++)		{
 		Str2CharPtr(System::Convert::ToString(targetFunction->Rows[0]->Cells[i]->Value), buffer);
 		data[0][i] = Fraction(Bignum(buffer), Bignum("1"));
+		if (i != targetFunction->ColumnCount - 1)
+			variables.push_back(Var::Basic);
 	}
-	for (int i = 1; i < restrictions_table->RowCount; i++) {
-		for (int j = 0; j < restrictions_table->ColumnCount; j++) {
+	//fills rest of table
+	for (std::size_t i = 0; i < restrictions_table->RowCount; i++) {
+		//add basic variables
+		for (std::size_t j = 0; j < restrictions_table->ColumnCount-2; j++) {
 			Str2CharPtr(System::Convert::ToString(restrictions_table->Rows[i]->Cells[j]->Value), buffer);
-			data[i][j] = Fraction(Bignum(buffer), Bignum("1"));
+			data[i+1][j] = Fraction(Bignum(buffer), Bignum("1"));
 		}
+		//process comparer cell
+		 Str2CharPtr(System::Convert::ToString(
+			 restrictions_table->Rows[i]->Cells[restrictions_table->ColumnCount - 2]->Value), buffer);
+		if (buffer == "<=") {
+			insert_nonbasic_variable_simplex(variables, basis, Var::Slack, "1", i);
+		}
+		else if (buffer == ">=") {
+			insert_nonbasic_variable_simplex(variables, basis, Var::Slack, "-1", i);
+			insert_nonbasic_variable_simplex(variables, basis, Var::Surplus, "1", i);
+		}
+		else {
+			insert_nonbasic_variable_simplex(variables, basis, Var::Surplus, "1", i);
+		}
+		//add b cell
+		Str2CharPtr(System::Convert::ToString(restrictions_table->Rows[i]->Cells[restrictions_table->ColumnCount - 1]->Value), buffer);
+		data[i].push_back(Fraction(Bignum(buffer), Bignum("1")));
 	}
-	return *this;
 }
 
 Matrix::Matrix() : Matrix(1, 1) {}

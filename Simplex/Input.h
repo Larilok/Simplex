@@ -363,7 +363,9 @@ namespace Simplex {
 
 
 	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
-		Matrix m(restrictions_table, targetFunction);
+		std::vector<size_t> variables;
+		std::vector<size_t> basis_index;
+		Matrix m(restrictions_table, targetFunction, variables, basis_index);
 		if (min_b->Checked) {
 			simplex_solution(m, 0);
 		}

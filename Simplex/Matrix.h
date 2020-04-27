@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstdlib>
 #include <ctime>
 #include <iomanip>
 #include <vector>
@@ -8,6 +9,7 @@
 #include <sstream>
 #include <vcclr.h>
 #include "Fraction.h"
+#include "Simplex.h"
 //using namespace std;
 
 class Matrix
@@ -16,23 +18,29 @@ private:
 	std::vector<std::vector<Fraction>> data;
 
 	void Str2CharPtr(System::String^ str, char* chrPtr);
-	//void insertColumnVector(const double *X, int &c);
+	void insert_nonbasic_variable_simplex(std::vector<size_t>& variables,
+		std::vector<size_t>& basis, 
+		Var type, const char* value,
+		size_t &current_row);
 	void swapRows(int& r1, int& r2);
 	//Matrix cutMatrix(int& column, int& row) const;
 	//void copyMatrix(const Matrix& M);
 	//void makeRow_bySpinning(int &r, int &i);
 	int maxElementIndexInRow(int c, int r);
 public:
-	Matrix() = default;
+	Matrix();
 	Matrix(const int& c, const int& r);
 	Matrix(const Matrix& M);
-	Matrix(System::Windows::Forms::DataGridView^ restrictions_table, System::Windows::Forms::DataGridView^ targetFunction);
+	Matrix(System::Windows::Forms::DataGridView^ restrictions_table,
+		System::Windows::Forms::DataGridView^ targetFunction, 
+		std::vector<size_t>& variables,
+		std::vector<size_t>& basis);
 	~Matrix();
 
 	Fraction getElement(int row, int column);
 	Fraction getEquivalent(int column);
-	size_t getLength() const;
-	size_t getHeight() const;
+	std::size_t getLength() const;
+	std::size_t getHeight() const;
 
 	/*Matrix& operator=(const Matrix& M);
 	Matrix operator/(const double& d) const;

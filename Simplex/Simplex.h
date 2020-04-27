@@ -1,4 +1,9 @@
 #pragma once
-#include "Matrix.h"
-void simplex_solution(const Matrix m, bool min_max);
+enum Var
+{
+	Basic,
+	Slack,
+	Surplus
+};
 
+void simplex_solution(const Matrix m, bool min_max);
