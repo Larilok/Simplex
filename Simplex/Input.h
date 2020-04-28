@@ -1,8 +1,8 @@
 ﻿#pragma once
 #include "Matrix.h"
+#include "Simplex.h"
 #include "answer.h"
 #include "about.h"
-#include "Simplex.h"
 
 namespace Simplex {
 
@@ -301,9 +301,15 @@ namespace Simplex {
 		c->Items->AddRange(">=", "=", "<=");
 		c->HeaderText = " ";
 		c->Name = "Comparer";
-
+	
 		restrictions_table->Columns->AddRange(c, gcnew DataGridViewTextBoxColumn());
 		restrictions_table->Columns[restrictions_table->ColumnCount - 1]->Name = "b";
+
+		for (size_t i = 0; i < restrictions_table->RowCount; i++)
+		{
+			restrictions_table->Rows[i]->Cells[restrictions_table->ColumnCount - 2]->Value = "=";
+		}
+		
 
 		restrictions_table->AutoResizeColumns();	//выравнивание ячеек
 		targetFunction->AutoResizeColumns();
@@ -366,12 +372,13 @@ namespace Simplex {
 		std::vector<size_t> variables;
 		std::vector<size_t> basis_index;
 		Matrix m(restrictions_table, targetFunction, variables, basis_index);
+
 		if (min_b->Checked) {
-			simplex_solution(m, 0);
+			m.simplex_solution(false, variables, basis_index);
 		}
 
 		if (max_b->Checked) {
-			simplex_solution(m, 1);
+			m.simplex_solution(true, variables, basis_index);
 
 			//auto where = m.Jorge_Gauss_solution();
 

@@ -1,4 +1,5 @@
-#include "MATRIX.h"
+#include "Matrix.h"
+#include <msclr\marshal_cppstd.h>
 
 #define EPS Fraction(Bignum(std::string(std::ostringstream(0.00001).str())), Bignum("1"))
 
@@ -26,29 +27,25 @@ std::size_t Matrix::getHeight() const
 
 Fraction Matrix::getEquivalent(int row)
 {
-	return data[row][getLength()];
+	return data[row][getLength()-1];
 }
 
 
-void Matrix::Str2CharPtr(System::String^ str, char* chrPtr)
+void Matrix::Str2CharPtr(System::String^ str, std::string& standardString)
 {
 	// Pin memory so GC can't move it while native function is called
-	pin_ptr<const wchar_t> wchPtr = PtrToStringChars(str);
-
-	// Convert wchar_t* to char*
-	std::size_t  convertedChars = 0;
-	std::size_t  sizeInBytes = ((str->Length + 1) * 2);
-
-	wcstombs_s(&convertedChars, chrPtr, sizeInBytes, wchPtr, sizeInBytes);
+	msclr::interop::marshal_context context;
+	standardString = context.marshal_as<std::string>(str);
+	if (standardString == "") standardString = "0";
 }
 
 void Matrix::insert_nonbasic_variable_simplex(
 	std::vector<size_t>& variables,
 	std::vector<size_t>& basis,
-	Var type, const char* value, size_t &current_row)
+	Var type, std::string value, size_t &current_row)
 {
 	variables.push_back(type);
-	if(type == Var::Surplus) basis.push_back(variables.size() - 1);
+	if(value == "1") basis.push_back(variables.size() - 1);
 
 	for (size_t k = 0; k < data.size(); k++)
 	{
@@ -63,10 +60,10 @@ Matrix::Matrix(System::Windows::Forms::DataGridView^ restrictions_table,
 	std::vector<size_t>& basis): 
 		data(restrictions_table->RowCount+1, std::vector<Fraction>(targetFunction->ColumnCount-1))
 {
-	char* buffer;	//buffer to save value from input
+	std::string buffer;	//buffer to save value from input
 
 	//fills first row with values of targerFunction
-	for (std::size_t i = 0; i < targetFunction->ColumnCount; i++)		{
+	for (std::size_t i = 0; i < targetFunction->ColumnCount-1; i++)	{
 		Str2CharPtr(System::Convert::ToString(targetFunction->Rows[0]->Cells[i]->Value), buffer);
 		data[0][i] = Fraction(Bignum(buffer), Bignum("1"));
 		if (i != targetFunction->ColumnCount - 1)
@@ -94,8 +91,11 @@ Matrix::Matrix(System::Windows::Forms::DataGridView^ restrictions_table,
 		}
 		//add b cell
 		Str2CharPtr(System::Convert::ToString(restrictions_table->Rows[i]->Cells[restrictions_table->ColumnCount - 1]->Value), buffer);
-		data[i].push_back(Fraction(Bignum(buffer), Bignum("1")));
+		data[i+1].push_back(Fraction(Bignum(buffer), Bignum("1")));
 	}
+	// add C if target function
+	Str2CharPtr(System::Convert::ToString(targetFunction->Rows[0]->Cells[targetFunction->ColumnCount - 1]->Value), buffer);
+	data[0].push_back(Fraction(Bignum(buffer), Bignum("1")));
 }
 
 Matrix::Matrix() : Matrix(1, 1) {}
@@ -117,8 +117,6 @@ Matrix::~Matrix()
 {
 	delete &data;
 }
-
-
 
 void Matrix::swapRows(int& r1, int& r2)
 {
@@ -146,6 +144,25 @@ std::ostream& operator<<(std::ostream& out, const Matrix& M)
 	return out;
 }
 
+
+void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variables, std::vector<size_t>& basis_indexes)
+{
+	auto init_target_function = this->data[0];
+	//STAGE 1
+	//new target function will be `min r = Surplus(1) + Surplas(2)...`
+	bool stage_direction = false;
+	for (size_t i = 0; i < getLength(); i++)
+	{
+		if (i >= variables.size() && variables[i] == Var::Surplus) continue;
+		for (size_t j = 1; j < getHeight(); j++)
+		{
+			if (variables[basis_indexes[j - 1]] = Var::Surplus)
+				data[0][i] += data[j][i];
+		}
+	}
+
+
+}
 
 
 std::vector<int> Matrix::Jorge_Gauss_solution() {

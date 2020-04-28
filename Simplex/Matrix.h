@@ -9,18 +9,23 @@
 #include <sstream>
 #include <vcclr.h>
 #include "Fraction.h"
-#include "Simplex.h"
-//using namespace std;
+
+enum Var
+{
+	Basic,
+	Slack,
+	Surplus
+};
 
 class Matrix
 {
 private:
 	std::vector<std::vector<Fraction>> data;
 
-	void Str2CharPtr(System::String^ str, char* chrPtr);
+	void Str2CharPtr(System::String^ str, std::string& sstring);
 	void insert_nonbasic_variable_simplex(std::vector<size_t>& variables,
 		std::vector<size_t>& basis, 
-		Var type, const char* value,
+		Var type, std::string value,
 		size_t &current_row);
 	void swapRows(int& r1, int& r2);
 	//Matrix cutMatrix(int& column, int& row) const;
@@ -53,6 +58,7 @@ public:
 	Matrix randomize();*/
 
 	//std::vector<int> Gauss_solution();
+	void simplex_solution(const bool& min_max, std::vector<size_t>& variables, std::vector<size_t>& basis_indexes);
 	std::vector<int> Jorge_Gauss_solution();
 	//std::vector<int> Spinner_solution();
 
