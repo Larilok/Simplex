@@ -31,7 +31,8 @@ private:
 	//Matrix cutMatrix(int& column, int& row) const;
 	//void copyMatrix(const Matrix& M);
 	//void makeRow_bySpinning(int &r, int &i);
-	int maxElementIndexInRow(int c, int r);
+	int maxRatioIndexInColumn(int c);
+	int maxMinIndexInRow(int r, const bool min_max);
 public:
 	Matrix();
 	Matrix(const int& c, const int& r);

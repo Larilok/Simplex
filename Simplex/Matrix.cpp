@@ -54,6 +54,9 @@ void Matrix::insert_nonbasic_variable_simplex(
 	}
 }
 
+
+
+
 Matrix::Matrix(System::Windows::Forms::DataGridView^ restrictions_table,
 	System::Windows::Forms::DataGridView^ targetFunction,
 	std::vector<size_t>& variables,
@@ -111,12 +114,13 @@ Matrix::Matrix(const Matrix& M)
 	}
 }
 
-
-
 Matrix::~Matrix()
 {
 	delete &data;
 }
+
+
+
 
 void Matrix::swapRows(int& r1, int& r2)
 {
@@ -153,14 +157,35 @@ void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variable
 	bool stage_direction = false;
 	for (size_t i = 0; i < getLength(); i++)
 	{
-		if (i >= variables.size() && variables[i] == Var::Surplus) continue;
+		if (i >= variables.size() || variables[i] == Var::Surplus) continue;
 		for (size_t j = 1; j < getHeight(); j++)
 		{
 			if (variables[basis_indexes[j - 1]] = Var::Surplus)
 				data[0][i] += data[j][i];
 		}
 	}
+	int i, j, r, c;
 
+	//std::vector<int> where(getLength(), -1);            //to find arbitrary real number ( all col = 0)
+	for (c = 0, r = 0; getLength() > c && getHeight() > r; ++c) {
+
+		size_t first_max_index_in_targetFunction = maxMinIndexInRow(0, false);
+
+		if (Fraction::abs(data[0][first_max_index_in_targetFunction]) < EPS) //mininimized
+			break;
+
+		size_t max_ratio_index = maxRatioIndexInColumn(first_max_index_in_targetFunction);
+		if (max_ratio_index < 0) break;  //completelly wrong TODO
+
+		for (i = 0; i < getHeight(); ++i) {
+			if (i != r) {
+				Fraction div_lead = data[i][c] / data[r][c];	//the a(2,1)/a(1,1)
+				for (j = c; j < getLength(); ++j)
+					data[i][j] -= data[r][j] * div_lead;		//for each row below making first el = 0
+			}
+		}
+		++r;
+	}
 
 }
 
@@ -171,7 +196,7 @@ std::vector<int> Matrix::Jorge_Gauss_solution() {
 	std::vector<int> where(getLength(), -1);            //to find arbitrary real number ( all col = 0)
 	for (c = 0, r = 0; getLength() > c && getHeight() > r; ++c) {
 
-		int max_r_index = this->maxElementIndexInRow(c, r);
+		int max_r_index = this->maxRatioIndexInColumn(c);
 		if (Fraction::abs(data[max_r_index][c]) < EPS) //all elements are 0 + processed float num error
 			continue;
 
@@ -192,13 +217,42 @@ std::vector<int> Matrix::Jorge_Gauss_solution() {
 	return where;
 }
 
-int Matrix::maxElementIndexInRow(int c, int r)
+int Matrix::maxRatioIndexInColumn(int c)
 {
-	int max_r = r;
-	for (int i = r; i < getLength() - 1; ++i)
-		if (Fraction::abs(data[i][c]) > Fraction::abs(data[max_r][c]))        //selecting max in a column
-			max_r = i;
-	return max_r;
+	int row_index = -1;
+	Fraction ratio;
+	for (int i = 0; i < getLength() - 1; ++i) {
+		if (row_index == -1) {
+			ratio = data[i][c] / data[i][getLength() - 1];
+			if (ratio < EPS) continue;						
+			row_index = i;
+		}
+		else {
+			Fraction temp = data[i][c] / data[i][getLength() - 1];
+			if (temp < EPS) continue;
+			if (ratio > temp) {
+				ratio = temp;
+				row_index = i;
+			}
+		}
+	}
+	return row_index;
+}
+
+int Matrix::maxMinIndexInRow(int r, const bool min_max)
+{
+	int column_index = 0;
+	if (min_max == false) {
+		for (int i = 1; i < getLength() - 1; ++i)
+			if (data[r][i] < data[r][column_index])        //selecting min in a row
+				column_index = i;
+	}
+	if (min_max == true) {
+		for (int i = 1; i < getLength() - 1; ++i)
+			if (data[r][i] > data[r][column_index])        //selecting max in a row
+				column_index = i;
+	}
+	return column_index;
 }
 
 int Matrix::backIter(std::vector<int>& where, std::vector<Fraction>& answer) {

@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "Matrix.h"
-#include "Simplex.h"
 #include "answer.h"
 #include "about.h"
 
