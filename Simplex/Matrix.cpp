@@ -1,7 +1,7 @@
 #include "Matrix.h"
 #include <msclr\marshal_cppstd.h>
 
-#define EPS Fraction(Bignum(std::string(std::ostringstream(0.00001).str())), Bignum("1"))
+#define ZERO Fraction(Bignum("0"), Bignum("1"))
 
 using namespace System;
 using namespace System::ComponentModel;
@@ -47,10 +47,10 @@ void Matrix::insert_nonbasic_variable_simplex(
 	variables.push_back(type);
 	if(value == "1") basis.push_back(variables.size() - 1);
 
-	for (size_t k = 0; k < data.size(); k++)
+	for (size_t k = 0; k < getHeight(); k++)
 	{
-		if (k == current_row) data[k].push_back(Fraction(Bignum(value), Bignum("1")));
-		else data[k].push_back(Fraction(Bignum("0"), Bignum("1")));
+		if (k == current_row+1) data[k].push_back(Fraction(Bignum(value), Bignum("1")));
+		else data[k].push_back(ZERO);
 	}
 }
 
@@ -103,7 +103,7 @@ Matrix::Matrix(System::Windows::Forms::DataGridView^ restrictions_table,
 
 Matrix::Matrix() : Matrix(1, 1) {}
 
-Matrix::Matrix(const int& c, const int& r) : data(r, std::vector<Fraction>(c, Fraction(Bignum("0"), Bignum("1")))){}
+Matrix::Matrix(const int& c, const int& r) : data(r, std::vector<Fraction>(c, ZERO)){}
 
 Matrix::Matrix(const Matrix& M)
 {
@@ -157,11 +157,12 @@ void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variable
 	bool stage_direction = false;
 	for (size_t i = 0; i < getLength(); i++)
 	{
+		data[0][i] = ZERO;
 		if (i >= variables.size() || variables[i] == Var::Surplus) continue;
 		for (size_t j = 1; j < getHeight(); j++)
 		{
-			if (variables[basis_indexes[j - 1]] = Var::Surplus)
-				data[0][i] += data[j][i];
+			if (variables[basis_indexes[j - 1]] == Var::Surplus)
+				data[0][i] = data[0][i] + data[j][i];
 		}
 	}
 	int i, j, r, c;
@@ -171,17 +172,17 @@ void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variable
 
 		size_t first_max_index_in_targetFunction = maxMinIndexInRow(0, false);
 
-		if (Fraction::abs(data[0][first_max_index_in_targetFunction]) < EPS) //mininimized
+		if (data[0][first_max_index_in_targetFunction] < ZERO) //mininimized
 			break;
 
-		size_t max_ratio_index = maxRatioIndexInColumn(first_max_index_in_targetFunction);
+		size_t max_ratio_index = minRatioIndexInColumn(first_max_index_in_targetFunction);
 		if (max_ratio_index < 0) break;  //completelly wrong TODO
 
 		for (i = 0; i < getHeight(); ++i) {
 			if (i != r) {
 				Fraction div_lead = data[i][c] / data[r][c];	//the a(2,1)/a(1,1)
 				for (j = c; j < getLength(); ++j)
-					data[i][j] -= data[r][j] * div_lead;		//for each row below making first el = 0
+					data[i][j] = data[i][j] - (data[r][j] * div_lead);		//for each row below making first el = 0
 			}
 		}
 		++r;
@@ -196,8 +197,8 @@ std::vector<int> Matrix::Jorge_Gauss_solution() {
 	std::vector<int> where(getLength(), -1);            //to find arbitrary real number ( all col = 0)
 	for (c = 0, r = 0; getLength() > c && getHeight() > r; ++c) {
 
-		int max_r_index = this->maxRatioIndexInColumn(c);
-		if (Fraction::abs(data[max_r_index][c]) < EPS) //all elements are 0 + processed float num error
+		int max_r_index = 0;// this->maxRatioIndexInColumn(c);
+		if (Fraction::abs(data[max_r_index][c]) < ZERO) //all elements are 0 + processed float num error
 			continue;
 
 		swapRows(max_r_index, r);         // row with max el now first
@@ -217,19 +218,19 @@ std::vector<int> Matrix::Jorge_Gauss_solution() {
 	return where;
 }
 
-int Matrix::maxRatioIndexInColumn(int c)
+int Matrix::minRatioIndexInColumn(int c)
 {
 	int row_index = -1;
 	Fraction ratio;
-	for (int i = 0; i < getLength() - 1; ++i) {
+	for (int i = 1; i < getHeight(); ++i) {
 		if (row_index == -1) {
-			ratio = data[i][c] / data[i][getLength() - 1];
-			if (ratio < EPS) continue;						
+			ratio = data[i][getLength() - 1] / data[i][c] ;
+			if (ratio < ZERO) continue;						
 			row_index = i;
 		}
 		else {
-			Fraction temp = data[i][c] / data[i][getLength() - 1];
-			if (temp < EPS) continue;
+			Fraction temp = data[i][getLength() - 1] / data[i][c] ;
+			if (temp < ZERO) continue;
 			if (ratio > temp) {
 				ratio = temp;
 				row_index = i;
@@ -244,12 +245,12 @@ int Matrix::maxMinIndexInRow(int r, const bool min_max)
 	int column_index = 0;
 	if (min_max == false) {
 		for (int i = 1; i < getLength() - 1; ++i)
-			if (data[r][i] < data[r][column_index])        //selecting min in a row
+			if (data[r][i] > data[r][column_index])        //selecting max in a row
 				column_index = i;
 	}
 	if (min_max == true) {
 		for (int i = 1; i < getLength() - 1; ++i)
-			if (data[r][i] > data[r][column_index])        //selecting max in a row
+			if (data[r][i] < data[r][column_index])        //selecting min in a row
 				column_index = i;
 	}
 	return column_index;
@@ -275,7 +276,7 @@ int Matrix::backIter(std::vector<int>& where, std::vector<Fraction>& answer) {
 		for (j = 0; j < getLength(); ++j)
 			sum += answer[j] * data[i][j];     //solving left part
 
-		if (Fraction::abs(sum - data[i][getLength()-1]) > EPS)            //something went complitely wrong
+		if (Fraction::abs(sum - data[i][getLength()-1]) > ZERO)            //something went complitely wrong
 			return 0;
 
 	}

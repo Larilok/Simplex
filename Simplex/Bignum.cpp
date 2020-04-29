@@ -39,7 +39,7 @@ void Bignum::handlePositiveCarry() {
         if (i == number.size() - 1 && carry != 0) {
             number.push_back(carry);
         }
-        else {
+        else if (carry != 0) {
             number[i + 1] += carry;
         }
     }
