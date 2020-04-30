@@ -180,33 +180,34 @@ void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variable
 	}
 
 	int i, j, r;
-	size_t first_column_max_index_in_targetFunction, min_row_ratio_index;
+	size_t column_new_basic_variable, row_basic_var_to_be_del;
 
 	while(true) {
-		first_column_max_index_in_targetFunction = maxMinIndexInRow(0, false);
+		column_new_basic_variable = maxMinIndexInRow(0, false);
 
-		if (data[0][first_column_max_index_in_targetFunction] < ZERO) //mininimized
+		if (data[0][column_new_basic_variable] < ZERO) //mininimized
 			break;
 
-		min_row_ratio_index = minRatioIndexInColumn(first_column_max_index_in_targetFunction);
-		if (min_row_ratio_index < 0) break;  //completelly wrong TODO ERROR
+		row_basic_var_to_be_del = minRatioIndexInColumn(column_new_basic_variable);
+		if (row_basic_var_to_be_del < 0) break;  //completelly wrong TODO ERROR
 
 		//delete Surplus var to speed up calculation
-		if (variables[basis_indexes[min_row_ratio_index - 1]] == Var::Surplus) {
-			variables.erase(variables.begin() + basis_indexes[min_row_ratio_index - 1]);
-			deleteSurplusColumn(basis_indexes[min_row_ratio_index - 1]);
+		if (variables[basis_indexes[row_basic_var_to_be_del - 1]] == Var::Surplus) {
+			variables.erase(variables.begin() + basis_indexes[row_basic_var_to_be_del - 1]);
+			deleteSurplusColumn(basis_indexes[row_basic_var_to_be_del - 1]);
 		}
-		basis_indexes[min_row_ratio_index - 1] = first_column_max_index_in_targetFunction;
+		basis_indexes[row_basic_var_to_be_del - 1] = column_new_basic_variable;
 		
 		// make pivot = 1 by dividing all row
-		for (j = 0, r = min_row_ratio_index; j < getLength(); ++j) {
-			data[r][j] = data[r][j] / data[r][first_column_max_index_in_targetFunction];
+		Fraction pivot = data[row_basic_var_to_be_del][column_new_basic_variable];
+		for (j = 0, r = row_basic_var_to_be_del; j < getLength(); ++j) {
+			data[r][j] = data[r][j] / pivot;
 		}
 		// fill the column with 0
 		for (i = 0; i < getHeight(); ++i) {
-			if (i != min_row_ratio_index) {
+			if (i != row_basic_var_to_be_del) {
 				for (j = 0; j < getLength(); ++j)
-					data[i][j] = data[i][j] - (data[min_row_ratio_index][j] * data[i][first_column_max_index_in_targetFunction]);
+					data[i][j] = data[i][j] - (data[row_basic_var_to_be_del][j] * data[i][column_new_basic_variable]);
 			}
 		}
 	}
