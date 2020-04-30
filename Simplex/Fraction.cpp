@@ -14,7 +14,17 @@ Fraction::Fraction(Bignum num, Bignum denom) {
     }
     numerator = num;
     denominator = denom;
-    if (numerator.isPositive != denominator.isPositive) isPositive = false;
+    if (numerator.isPositive && !denominator.isPositive) {
+        isPositive = false;
+        numerator.isPositive = false;
+        denominator.isPositive = true;
+    }
+    else if (!numerator.isPositive && !denominator.isPositive) {
+        isPositive = true;
+        numerator.isPositive = true;
+        denominator.isPositive = true;
+    }
+    else if (!numerator.isPositive && denominator.isPositive) isPositive = false;
     else isPositive = true;
 }
 

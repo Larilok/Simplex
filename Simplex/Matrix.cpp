@@ -182,7 +182,8 @@ void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variable
 	int i, j, r;
 	size_t column_new_basic_variable, row_basic_var_to_be_del;
 
-	while(true) {
+	for (size_t i = 0;true; i++)
+	{
 		column_new_basic_variable = maxMinIndexInRow(0, false);
 
 		if (data[0][column_new_basic_variable] < ZERO) //mininimized
@@ -203,11 +204,13 @@ void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variable
 		for (j = 0, r = row_basic_var_to_be_del; j < getLength(); ++j) {
 			data[r][j] = data[r][j] / pivot;
 		}
-		// fill the column with 0
+		// Jorge-gauss
+		Fraction div;
 		for (i = 0; i < getHeight(); ++i) {
 			if (i != row_basic_var_to_be_del) {
+				div = data[i][column_new_basic_variable];
 				for (j = 0; j < getLength(); ++j)
-					data[i][j] = data[i][j] - (data[row_basic_var_to_be_del][j] * data[i][column_new_basic_variable]);
+					data[i][j] = data[i][j] - (div * data[row_basic_var_to_be_del][j]);
 			}
 		}
 	}
