@@ -92,11 +92,13 @@ Matrix::Matrix(System::Windows::Forms::DataGridView^ restrictions_table,
 		else {
 			insert_nonbasic_variable_simplex(variables, basis, Var::Surplus, "1", i);
 		}
-		//add b cell
-		Str2CharPtr(System::Convert::ToString(restrictions_table->Rows[i]->Cells[restrictions_table->ColumnCount - 1]->Value), buffer);
-		data[i+1].push_back(Fraction(Bignum(buffer), Bignum("1")));
 	}
-	// add C if target function
+	//add b cell
+	for (std::size_t i = 0; i < restrictions_table->RowCount; i++) {
+		Str2CharPtr(System::Convert::ToString(restrictions_table->Rows[i]->Cells[restrictions_table->ColumnCount - 1]->Value), buffer);
+		data[i + 1].push_back(Fraction(Bignum(buffer), Bignum("1")));
+	}
+	// add C target function
 	Str2CharPtr(System::Convert::ToString(targetFunction->Rows[0]->Cells[targetFunction->ColumnCount - 1]->Value), buffer);
 	data[0].push_back(Fraction(Bignum(buffer), Bignum("1")));
 }
@@ -133,6 +135,14 @@ void Matrix::swapRows(int& r1, int& r2)
 	}
 }
 
+void Matrix::deleteSurplusColumn(std::size_t c)
+{
+	for (size_t i = 0; i < getHeight(); i++)
+	{
+		data[i].erase(data[i].begin() + c);
+	}
+}
+
 
 // to simplyfy printing matrix
 std::ostream& operator<<(std::ostream& out, const Matrix& M)
@@ -158,6 +168,55 @@ void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variable
 	for (size_t i = 0; i < getLength(); i++)
 	{
 		data[0][i] = ZERO;
+
+		if (i != variables.size()) {
+			if (variables[i] == Var::Surplus) continue;
+		}
+		for (size_t j = 1; j < getHeight(); j++)
+		{
+			if (variables[basis_indexes[j - 1]] == Var::Surplus)
+				data[0][i] = data[0][i] + data[j][i];
+		}
+	}
+
+	int i, j, r;
+	size_t first_column_max_index_in_targetFunction, min_row_ratio_index;
+
+	while(true) {
+		first_column_max_index_in_targetFunction = maxMinIndexInRow(0, false);
+
+		if (data[0][first_column_max_index_in_targetFunction] < ZERO) //mininimized
+			break;
+
+		min_row_ratio_index = minRatioIndexInColumn(first_column_max_index_in_targetFunction);
+		if (min_row_ratio_index < 0) break;  //completelly wrong TODO ERROR
+
+		//delete Surplus var to speed up calculation
+		if (variables[basis_indexes[min_row_ratio_index - 1]] == Var::Surplus) {
+			variables.erase(variables.begin() + basis_indexes[min_row_ratio_index - 1]);
+			deleteSurplusColumn(basis_indexes[min_row_ratio_index - 1]);
+		}
+		basis_indexes[min_row_ratio_index - 1] = first_column_max_index_in_targetFunction;
+		
+		// make pivot = 1 by dividing all row
+		for (j = 0, r = min_row_ratio_index; j < getLength(); ++j) {
+			data[r][j] = data[r][j] / data[r][first_column_max_index_in_targetFunction];
+		}
+		// fill the column with 0
+		for (i = 0; i < getHeight(); ++i) {
+			if (i != min_row_ratio_index) {
+				for (j = 0; j < getLength(); ++j)
+					data[i][j] = data[i][j] - (data[min_row_ratio_index][j] * data[i][first_column_max_index_in_targetFunction]);
+			}
+		}
+	}
+
+	if (data[0][getLength()] != ZERO) throw std::exception("min r result isn't `0`");
+	//STAGE 2
+
+	for (size_t i = 0; i < getLength(); i++)
+	{
+		data[0][i] = ZERO;
 		if (i >= variables.size() || variables[i] == Var::Surplus) continue;
 		for (size_t j = 1; j < getHeight(); j++)
 		{
@@ -165,29 +224,6 @@ void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variable
 				data[0][i] = data[0][i] + data[j][i];
 		}
 	}
-	int i, j, r, c;
-
-	//std::vector<int> where(getLength(), -1);            //to find arbitrary real number ( all col = 0)
-	for (c = 0, r = 0; getLength() > c && getHeight() > r; ++c) {
-
-		size_t first_max_index_in_targetFunction = maxMinIndexInRow(0, false);
-
-		if (data[0][first_max_index_in_targetFunction] < ZERO) //mininimized
-			break;
-
-		size_t max_ratio_index = minRatioIndexInColumn(first_max_index_in_targetFunction);
-		if (max_ratio_index < 0) break;  //completelly wrong TODO
-
-		for (i = 0; i < getHeight(); ++i) {
-			if (i != r) {
-				Fraction div_lead = data[i][c] / data[r][c];	//the a(2,1)/a(1,1)
-				for (j = c; j < getLength(); ++j)
-					data[i][j] = data[i][j] - (data[r][j] * div_lead);		//for each row below making first el = 0
-			}
-		}
-		++r;
-	}
-
 }
 
 

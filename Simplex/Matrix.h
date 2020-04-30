@@ -28,6 +28,7 @@ private:
 		Var type, std::string value,
 		size_t &current_row);
 	void swapRows(int& r1, int& r2);
+	void deleteSurplusColumn(std::size_t c);
 	//Matrix cutMatrix(int& column, int& row) const;
 	//void copyMatrix(const Matrix& M);
 	//void makeRow_bySpinning(int &r, int &i);

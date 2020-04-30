@@ -281,10 +281,10 @@ namespace Simplex {
 		int init_columns = 2;
 		int init_rows = 4;
 		VariablesNum->Value = init_columns;	// значения Up/Down
-		RestrictionsNum->Value = init_rows;
+		RestrictionsNum->Value = init_rows-1;
 
 		restrictions_table->ColumnCount = init_columns;		// начальное число столбцов и строк
-		restrictions_table->RowCount = init_rows;
+		restrictions_table->RowCount = init_rows-1;
 		targetFunction->ColumnCount = init_columns + 1;
 		targetFunction->RowCount = init_rows - 3;
 
@@ -306,7 +306,7 @@ namespace Simplex {
 
 		for (size_t i = 0; i < restrictions_table->RowCount; i++)
 		{
-			restrictions_table->Rows[i]->Cells[restrictions_table->ColumnCount - 2]->Value = "=";
+			restrictions_table->Rows[i]->Cells[restrictions_table->ColumnCount - 2]->Value = "<=";
 		}
 		
 
