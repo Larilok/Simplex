@@ -35,6 +35,8 @@ public:
     Fraction operator-=(Fraction& frac);
     bool operator>(const Fraction& num);
     bool operator<( Fraction& num);
+    bool operator>=(const Fraction& num);
+    bool operator<=( Fraction& num);
     friend std::ostream& operator<<(std::ostream& output, const Fraction& frac);
 };
 

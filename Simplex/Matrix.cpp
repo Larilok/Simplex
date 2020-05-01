@@ -68,7 +68,7 @@ Matrix::Matrix(System::Windows::Forms::DataGridView^ restrictions_table,
 	//fills first row with values of targerFunction
 	for (std::size_t i = 0; i < targetFunction->ColumnCount-1; i++)	{
 		Str2CharPtr(System::Convert::ToString(targetFunction->Rows[0]->Cells[i]->Value), buffer);
-		data[0][i] = Fraction(Bignum(buffer), Bignum("1"));
+		data[0][i] = Fraction(-Bignum(buffer), Bignum("1"));
 		if (i != targetFunction->ColumnCount - 1)
 			variables.push_back(Var::Basic);
 	}
@@ -161,20 +161,18 @@ std::ostream& operator<<(std::ostream& out, const Matrix& M)
 
 void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variables, std::vector<size_t>& basis_indexes)
 {
-	auto init_target_function = this->data[0];
 	//STAGE 1
-	//new target function will be `min r = Surplus(1) + Surplas(2)...`
+	//new target function will be `min r = Surplus(1) + Surplas(2)...` and original will be at second row
 	bool stage_direction = false;
+	data.insert(data.begin(), std::vector<Fraction>(getLength(), ZERO));
 	for (size_t i = 0; i < getLength(); i++)
 	{
-		data[0][i] = ZERO;
-
 		if (i != variables.size()) {
 			if (variables[i] == Var::Surplus) continue;
 		}
-		for (size_t j = 1; j < getHeight(); j++)
+		for (size_t j = 2; j < getHeight(); j++)
 		{
-			if (variables[basis_indexes[j - 1]] == Var::Surplus)
+			if (variables[basis_indexes[j - 2]] == Var::Surplus)
 				data[0][i] = data[0][i] + data[j][i];
 		}
 	}
@@ -186,20 +184,24 @@ void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variable
 	{
 		column_new_basic_variable = maxMinIndexInRow(0, false);
 
-		if (data[0][column_new_basic_variable] < ZERO) //mininimized
+		if (data[0][column_new_basic_variable] <= ZERO) //mininimized
 			break;
 
 		row_basic_var_to_be_del = minRatioIndexInColumn(column_new_basic_variable);
 		if (row_basic_var_to_be_del < 0) break;  //completelly wrong TODO ERROR
 
 		//delete Surplus var to speed up calculation
-		if (variables[basis_indexes[row_basic_var_to_be_del - 1]] == Var::Surplus) {
-			variables.erase(variables.begin() + basis_indexes[row_basic_var_to_be_del - 1]);
-			deleteSurplusColumn(basis_indexes[row_basic_var_to_be_del - 1]);
+		if (variables[basis_indexes[row_basic_var_to_be_del - 2]] == Var::Surplus) {
+			variables.erase(variables.begin() + basis_indexes[row_basic_var_to_be_del - 2]);
+			for (size_t& var : basis_indexes)
+			{
+				if (var > basis_indexes[row_basic_var_to_be_del - 2]) var--;
+			}
+			deleteSurplusColumn(basis_indexes[row_basic_var_to_be_del - 2]);
 		}
-		basis_indexes[row_basic_var_to_be_del - 1] = column_new_basic_variable;
+		basis_indexes[row_basic_var_to_be_del - 2] = column_new_basic_variable;
 		
-		// make pivot = 1 by dividing all row
+		// make pivot = 1 by dividing all elements of the row
 		Fraction pivot = data[row_basic_var_to_be_del][column_new_basic_variable];
 		for (j = 0, r = row_basic_var_to_be_del; j < getLength(); ++j) {
 			data[r][j] = data[r][j] / pivot;
@@ -215,17 +217,43 @@ void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variable
 		}
 	}
 
-	if (data[0][getLength()] != ZERO) throw std::exception("min r result isn't `0`");
-	//STAGE 2
+	if (data[0][getLength()-1] != ZERO) throw std::exception("min r result isn't `0`");
 
-	for (size_t i = 0; i < getLength(); i++)
+	//delete stage 1 target function
+	data.erase(data.begin());
+
+	//STAGE 2
+	for (size_t i = 0; true; i++)
 	{
-		data[0][i] = ZERO;
-		if (i >= variables.size() || variables[i] == Var::Surplus) continue;
-		for (size_t j = 1; j < getHeight(); j++)
-		{
-			if (variables[basis_indexes[j - 1]] == Var::Surplus)
-				data[0][i] = data[0][i] + data[j][i];
+		column_new_basic_variable = maxMinIndexInRow(0, min_max);
+
+		if (min_max) {
+			if (data[0][column_new_basic_variable] >= ZERO) //maximized
+				break;
+		}
+		else {
+			if (data[0][column_new_basic_variable] <= ZERO) //minimized
+				break;
+		}
+		
+		row_basic_var_to_be_del = minRatioIndexInColumn(column_new_basic_variable);
+		if (row_basic_var_to_be_del < 0) break;  //completelly wrong TODO ERROR
+
+		basis_indexes[row_basic_var_to_be_del - 1] = column_new_basic_variable;
+
+		// make pivot = 1 by dividing all elements of the row
+		Fraction pivot = data[row_basic_var_to_be_del][column_new_basic_variable];
+		for (j = 0, r = row_basic_var_to_be_del; j < getLength(); ++j) {
+			data[r][j] = data[r][j] / pivot;
+		}
+		// Jorge-gauss
+		Fraction div;
+		for (i = 0; i < getHeight(); ++i) {
+			if (i != row_basic_var_to_be_del) {
+				div = data[i][column_new_basic_variable];
+				for (j = 0; j < getLength(); ++j)
+					data[i][j] = data[i][j] - (div * data[row_basic_var_to_be_del][j]);
+			}
 		}
 	}
 }
@@ -262,7 +290,7 @@ int Matrix::minRatioIndexInColumn(int c)
 {
 	int row_index = -1;
 	Fraction ratio;
-	for (int i = 1; i < getHeight(); ++i) {
+	for (int i = 2; i < getHeight(); ++i) {
 		if (row_index == -1) {
 			ratio = data[i][getLength() - 1] / data[i][c] ;
 			if (ratio < ZERO) continue;						
