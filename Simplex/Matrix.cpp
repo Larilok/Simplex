@@ -117,9 +117,7 @@ Matrix::Matrix(const Matrix& M)
 }
 
 Matrix::~Matrix()
-{
-	delete &data;
-}
+{ }
 
 
 
@@ -143,27 +141,11 @@ void Matrix::deleteSurplusColumn(std::size_t c)
 	}
 }
 
-
-// to simplyfy printing matrix
-std::ostream& operator<<(std::ostream& out, const Matrix& M)
+void Matrix::simplex_solution(std::ostream& logs, const bool& min_max, std::vector<size_t>& variables, std::vector<size_t>& basis_indexes)
 {
-	out << std::fixed << std::setprecision(3);
-	for (int i = 0; i < M.getHeight(); i++)
-	{
-		for (int j = 0; j < M.getLength(); j++)
-			out << std::setw(8) << std::left << M.data[i][j] << " ";
-		//out << std::setw(8) << std::left << M.data[i][M.getLength() - 1] << " | " << M.ecv[i] << std::endl;
-
-	}
-	return out;
-}
-
-
-void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variables, std::vector<size_t>& basis_indexes)
-{
+	printSimplexMatrix(logs,*this, variables, basis_indexes);
 	//STAGE 1
-	//new target function will be `min r = Surplus(1) + Surplas(2)...` and original will be at second row
-	bool stage_direction = false;
+	logs << "STAGE 1\nNew target function will be `min r = Surplus(1) + Surplas(2)...` and original will be the second row" <<std::endl <<std::endl;
 	data.insert(data.begin(), std::vector<Fraction>(getLength(), ZERO));
 	for (size_t i = 0; i < getLength(); i++)
 	{
@@ -176,6 +158,7 @@ void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variable
 				data[0][i] = data[0][i] + data[j][i];
 		}
 	}
+	printSimplexMatrix(logs, *this, variables, basis_indexes);
 
 	int i, j, r;
 	size_t column_new_basic_variable, row_basic_var_to_be_del;
@@ -190,8 +173,11 @@ void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variable
 		row_basic_var_to_be_del = minRatioIndexInColumn(column_new_basic_variable);
 		if (row_basic_var_to_be_del < 0) break;  //completelly wrong TODO ERROR
 
+		logs << column_new_basic_variable+1 << "+, " << basis_indexes[row_basic_var_to_be_del - 2]+1 << "-" << std::endl << std::endl;
 		//delete Surplus var to speed up calculation
 		if (variables[basis_indexes[row_basic_var_to_be_del - 2]] == Var::Surplus) {
+			logs << "Delete surplus variable to speed up calculations at index "
+				<< basis_indexes[row_basic_var_to_be_del - 2] << std::endl << std::endl;
 			variables.erase(variables.begin() + basis_indexes[row_basic_var_to_be_del - 2]);
 			for (size_t& var : basis_indexes)
 			{
@@ -200,13 +186,15 @@ void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variable
 			deleteSurplusColumn(basis_indexes[row_basic_var_to_be_del - 2]);
 		}
 		basis_indexes[row_basic_var_to_be_del - 2] = column_new_basic_variable;
-		
+		//printSimplexMatrix(logs, *this, variables, basis_indexes);
+
 		// make pivot = 1 by dividing all elements of the row
 		Fraction pivot = data[row_basic_var_to_be_del][column_new_basic_variable];
 		for (j = 0, r = row_basic_var_to_be_del; j < getLength(); ++j) {
 			data[r][j] = data[r][j] / pivot;
 		}
 		// Jorge-gauss
+		//logs << "Jordan-Gauss transformations" << std::endl << std::endl;
 		Fraction div;
 		for (i = 0; i < getHeight(); ++i) {
 			if (i != row_basic_var_to_be_del) {
@@ -215,13 +203,14 @@ void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variable
 					data[i][j] = data[i][j] - (div * data[row_basic_var_to_be_del][j]);
 			}
 		}
+		printSimplexMatrix(logs, *this, variables, basis_indexes);
 	}
 
 	if (data[0][getLength()-1] != ZERO) throw std::exception("min r result isn't `0`");
 
 	//delete stage 1 target function
 	data.erase(data.begin());
-
+	logs << "STAGE 2" << std::endl << std::endl;
 	//STAGE 2
 	for (size_t i = 0; true; i++)
 	{
@@ -239,6 +228,7 @@ void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variable
 		row_basic_var_to_be_del = minRatioIndexInColumn(column_new_basic_variable);
 		if (row_basic_var_to_be_del < 0) break;  //completelly wrong TODO ERROR
 
+		logs << column_new_basic_variable << "+, " << basis_indexes[row_basic_var_to_be_del - 1] << "-" << std::endl << std::endl;
 		basis_indexes[row_basic_var_to_be_del - 1] = column_new_basic_variable;
 
 		// make pivot = 1 by dividing all elements of the row
@@ -255,35 +245,8 @@ void Matrix::simplex_solution(const bool& min_max, std::vector<size_t>& variable
 					data[i][j] = data[i][j] - (div * data[row_basic_var_to_be_del][j]);
 			}
 		}
+		printSimplexMatrix(logs, *this, variables, basis_indexes);
 	}
-}
-
-
-std::vector<int> Matrix::Jorge_Gauss_solution() {
-	int i, j, r, c;
-
-	std::vector<int> where(getLength(), -1);            //to find arbitrary real number ( all col = 0)
-	for (c = 0, r = 0; getLength() > c && getHeight() > r; ++c) {
-
-		int max_r_index = 0;// this->maxRatioIndexInColumn(c);
-		if (Fraction::abs(data[max_r_index][c]) < ZERO) //all elements are 0 + processed float num error
-			continue;
-
-		swapRows(max_r_index, r);         // row with max el now first
-		where[c] = r;               //the col isn't zero one
-
-		for (i = 0; i < getHeight(); ++i) {
-			if (i != r) {
-				Fraction div_lead = data[i][c] / data[r][c];      //the a(2,1)/a(1,1)
-				for (j = c; j < getLength(); ++j)
-					data[i][j] -= data[r][j] * div_lead;  //for each row below making first el = 0
-
-				//ecv[i] -= ecv[r] * div_lead;
-			}
-		}
-		++r;
-	}
-	return where;
 }
 
 int Matrix::minRatioIndexInColumn(int c)
@@ -324,10 +287,9 @@ int Matrix::maxMinIndexInRow(int r, const bool min_max)
 	return column_index;
 }
 
-int Matrix::backIter(std::vector<int>& where, std::vector<Fraction>& answer) {
+int Matrix::backIter(std::vector<size_t>& where, std::vector<Fraction>& answer) {
 
 	int r = getHeight() - 1, k = getLength() - 1, i, j;
-	//answer.assign(getLength());
 
 	while (k >= 0 && r >= 0) {
 		if (where[r] != -1) {
@@ -349,218 +311,54 @@ int Matrix::backIter(std::vector<int>& where, std::vector<Fraction>& answer) {
 
 	}
 
-	for (i = 0; i < getLength(); ++i)
-		if (where[i] == -1)
-			return 2;
-
 	return 1;
 
 }
 
-//to fill matrix easely
-//std::istream& operator>>(std::istream& in, Matrix& M)
-//{
-//	for (int i = 0; i < M.rows; i++) {
-//		for (int j = 0; j < M.columns; j++) {
-//			std::cout << "Row " << i + 1 << " column " << j + 1 << ": ";
-//			in >> M.elements[i][j];
-//		}
-//		std::cout << " = ";
-//		in >> M.ecv[i];
-//		std::cout << M << std::endl;
-//	}
-//	return in;
-//}
+std::ostream& Matrix::printSimplexMatrix(std::ostream& out, const Matrix& M, const std::vector<size_t>& variables, const std::vector<size_t>& basis_indexes)
+{
+	size_t columnWidth = 8;
+	//print head
+	for (size_t i = 0; i < columnWidth; i++) { out << " "; }
 
-//Matrix& Matrix::operator=(const Matrix& M)
-//{
-//	copyMatrix(M);
-//	return *this;
-//}
-//
-//void Matrix::copyMatrix(const Matrix& M)
-//{
-//	for (int i = 0; i < rows; i++)
-//		delete elements[i];
-//	delete elements;
-//	columns = M.columns;
-//	rows = M.rows;
-//	elements = new double* [rows];
-//	for (int i = 0; i < rows; i++)
-//		elements[i] = new double[columns];
-//	for (int i = 0; i < rows; i++)
-//		for (int j = 0; j < columns; j++)
-//			elements[i][j] = M.elements[i][j];
-//}
+	for (size_t i = 0, b = 1, s = 1; i < variables.size(); i++)
+	{
+		if (variables[i] == Var::Basic || variables[i] == Var::Slack) {
+			out << std::setw(columnWidth) << std::right << "x(" + std::to_string(b++) + ")";
+		}
+		else { out << std::setw(columnWidth) << std::right << "R(" + std::to_string(s++)+ ")"; }
+	}
+	out << std::setw(columnWidth) << std::right << "b" << std::endl;
 
+	for (int i = 0; i < M.getHeight(); i++)
+	{	// basis value
+		if ((M.getHeight() - basis_indexes.size()) == 2) {
+			if (i == 0) { out << std::setw(columnWidth) << std::left << "r"; }
+			else if (i == 1) { out << std::setw(columnWidth) << std::left << "z"; }
+			else { out << std::setw(columnWidth) << std::left << "col("+ std::to_string(basis_indexes[i - 2]+1) + ")"; }
+		}
+		else {
+			if (i == 0) { out << std::setw(columnWidth) << std::left << "z"; }
+			else { out << std::setw(columnWidth) << std::left << "col(" + std::to_string(basis_indexes[i - 1]+1) + ")";}
+		}
 
-//void Matrix::insertColumnVector(const double* X, int& c)
-//{
-//	for (int i = 0; i < rows; i++)
-//		elements[i][c] = X[i];
-//}
+		// element value
+		for (int j = 0; j < M.getLength(); j++)
+			out << std::setw(columnWidth) << std::right << M.data[i][j];
+		out << std::endl;
+	}
+	out << std::endl << std::endl;
+	return out;
+}
 
-//Matrix Matrix::cutMatrix(int& column, int& row) const
-//{
-//	Matrix cutM(columns - 1, rows - 1);
-//	int iterationRow = 0;
-//	for (int i = 0; i < rows; i++)
-//	{
-//		if (i == row)
-//			continue;
-//		int ic = 0;
-//		for (int j = 0; j < columns; j++)
-//		{
-//			if (j == column)
-//				continue;
-//			cutM.elements[iterationRow][ic] = elements[i][j];
-//			ic++;
-//		}
-//		iterationRow++;
-//	}
-//	return cutM;
-//}
+// to simplyfy printing matrix
+std::ostream& operator<<(std::ostream& out, const Matrix& M)
+{
+	for (int i = 0; i < M.getHeight(); i++)
+	{
+		for (int j = 0; j < M.getLength(); j++)
+			out << std::setw(8) << std::left << M.data[i][j] << " ";
 
-//
-//Matrix Matrix::operator/(const double& d) const
-//{
-//	if (d == 0.0)
-//		throw std::exception("You cannot divide by 0");
-//	Matrix prodM(columns, rows);
-//	for (int i = 0; i < rows; i++) {
-//		for (int j = 0; j < columns; j++)
-//			prodM.elements[i][j] = elements[i][j] / d;
-//		prodM.ecv[i] = ecv[i] / d;
-//	}
-//	return prodM;
-//}
-//
-//Matrix Matrix::operator/=(const double& d)
-//{
-//	*this = *this / d;
-//	return *this;
-//}
-
-//double Matrix::determinant() const
-//{
-//	if (columns != rows)
-//		throw std::exception("Error - given matrix is not a square matrix");
-//	double determinant = 0.0;
-//	if (columns == 1)
-//		return determinant = elements[0][0];
-//	else
-//	{
-//		for (int i = 0; i < columns; i++)
-//		{
-//			int r = 0;
-//			Matrix cutM = cutMatrix(i, r);
-//			determinant += elements[r][i] * pow(-1, i) * cutM.determinant();
-//		}
-//		return determinant;
-//	}
-//}
-
-//void Matrix::check_det_forLargeMatrix(int i, int k) {
-//	int max_i = -1;
-//
-//	for (i = k; i < rows; i++) {
-//		if (fabs(elements[i][k]) > 0) {
-//			max_i = i;
-//		}
-//	}
-//
-//
-//	if (max_i == -1) {
-//		throw std::exception("Error: det=0");
-//
-//	}
-//}
-
-//Matrix Matrix::randomize()
-//{
-//	srand((unsigned int)time(NULL));
-//	for (int i = 0; i < rows; i++) {
-//		for (int j = 0; j < columns; j++)
-//			elements[i][j] = rand() % 101;
-//		ecv[i] = rand() % 101;
-//	}
-//	return *this;
-//}
-
-
-//Matrix Matrix::transpone() const
-//{
-//	Matrix transponedM(rows, columns);
-//	for (int i = 0; i < rows; i++)
-//		for (int j = 0; j < columns; j++)
-//			transponedM.elements[j][i] = elements[i][j];
-//	return transponedM;
-//}
-
-
-//std::vector<int> Matrix::Gauss_solution() {
-//	int i = 0, j = 0, r = 0, c = 0;
-//	std::vector<int> where(columns, -1);            //to find arbitrary real number ( all col = 0)
-//	for (; c < columns && r < rows; c++) {
-//
-//			int max_r_index = this->maxElementIndexInRow(c, r);
-//		if (abs(elements[max_r_index][c]) < EPS)         //all elements are 0 + processed float num error
-//			continue;
-//
-//		swapRows(max_r_index, r);         // row with max el now first
-//		where[c] = r;               //the col isn't zero one
-//
-//		for (i = r + 1; i < rows; i++) {
-//
-//			double divider = elements[i][c] / elements[r][c];
-//			elements[i][c] = 0;           //element lower = 0
-//			for (j = c + 1; j < columns; ++j) {
-//				elements[i][j] -= elements[r][j] * divider;
-//			}
-//			ecv[i] -= ecv[r] * divider;
-//		}
-//		r++;
-//	}
-//	return where;
-//}
-
-
-//void Matrix::makeRow_bySpinning(int &r, int &i) {
-//	double sin,cos,hipotenusa, temp;
-//	hipotenusa = sqrt((elements[r][r] * elements[r][r] + elements[i][r] * elements[i][r]));
-//	sin = elements[r][r] / hipotenusa;
-//	cos = elements[i][r] / hipotenusa;
-//
-//	for (int j = r; j < columns; ++j) {
-//		temp = elements[r][j];
-//		elements[r][j] = elements[r][j] * sin + elements[i][j] * cos;	//top element
-//		elements[i][j] = temp * cos - elements[i][j] * sin;				//lower element
-//	}
-//	temp = ecv[r];
-//	ecv[r] = ecv[r] * sin + ecv[i] * cos;
-//	ecv[i] = temp * cos - ecv[i] * sin;
-//
-//}
-
-
-
-//std::vector<int> Matrix::Spinner_solution() {
-//	int i, r, c;
-//
-//	std::vector<int> where(columns, -1);            //to check whether the column is absolute 0
-//	for (c = 0, r = 0; columns > c && rows > r; ++c) {
-//		int max_r = this->maxElementIndexInRow(c, r);
-//		if (abs(elements[max_r][c]) < EPS)         //all elements are 0 + processed float num error
-//			continue;
-//		swapRows(max_r, r);         // row with max el now first
-//		where[c] = r;               //the row isn't zero one
-//
-//
-//		for (i = r + 1; i < rows; ++i) {
-//			makeRow_bySpinning(r, i);
-//		}
-//		++r;
-//	}
-//	return where;
-//}
-//
+	}
+	return out;
+}

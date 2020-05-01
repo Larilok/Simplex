@@ -29,9 +29,6 @@ private:
 		size_t &current_row);
 	void swapRows(int& r1, int& r2);
 	void deleteSurplusColumn(std::size_t c);
-	//Matrix cutMatrix(int& column, int& row) const;
-	//void copyMatrix(const Matrix& M);
-	//void makeRow_bySpinning(int &r, int &i);
 	int minRatioIndexInColumn(int c);
 	int maxMinIndexInRow(int r, const bool min_max);
 public:
@@ -49,25 +46,10 @@ public:
 	std::size_t getLength() const;
 	std::size_t getHeight() const;
 
-	/*Matrix& operator=(const Matrix& M);
-	Matrix operator/(const double& d) const;
-	Matrix operator/(Bignum second);
-	Matrix operator/=(const double& d);
-	Matrix operator/=(Bignum second);
+	void simplex_solution(std::ostream& logs, const bool& min_max, std::vector<size_t>& variables, std::vector<size_t>& basis_indexes);
+	int backIter(std::vector<size_t> &where, std::vector<Fraction> &answer);
 
-	double determinant() const;
-	Matrix transpone() const;
-	Matrix randomize();*/
-
-	//std::vector<int> Gauss_solution();
-	void simplex_solution(const bool& min_max, std::vector<size_t>& variables, std::vector<size_t>& basis_indexes);
-	std::vector<int> Jorge_Gauss_solution();
-	//std::vector<int> Spinner_solution();
-
-	int backIter(std::vector<int> &where, std::vector<Fraction> &answer);
-
+	std::ostream& printSimplexMatrix(std::ostream& out, const Matrix& M, const std::vector<size_t>& variables, const std::vector<size_t>& basis_indexes);
 	friend std::ostream& operator<<(std::ostream& out, const Matrix& M);
-	//friend std::istream& operator>>(std::istream& in, Matrix& M);
 
-	//void check_det_forLargeMatrix(int i, int k);
 };

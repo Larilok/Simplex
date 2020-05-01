@@ -370,20 +370,17 @@ namespace Simplex {
 	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
 		std::vector<size_t> variables;
 		std::vector<size_t> basis_index;
+		std::stringstream logs;
 		Matrix m(restrictions_table, targetFunction, variables, basis_index);
 
 		if (min_b->Checked) {
-			m.simplex_solution(false, variables, basis_index);
+			m.simplex_solution(logs, false, variables, basis_index);
 		}
-
 		if (max_b->Checked) {
-			m.simplex_solution(true, variables, basis_index);
-
-			//auto where = m.Jorge_Gauss_solution();
-
-			//Answer^ ans = gcnew Answer(m, where, rb2->Text);
-			//ans->Show();
+			m.simplex_solution(logs, true, variables, basis_index);
 		}
+		Answer^ ans = gcnew Answer(m, logs, basis_index);
+		ans->Show();
 
 	}
 		   //private: System::Void restrictions_table_CellValidating(System::Object^  sender, System::Windows::Forms::DataGridViewCellValidatingEventArgs^  e) {

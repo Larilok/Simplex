@@ -44,14 +44,19 @@ Bignum Fraction::euclideanAlgorithm(Bignum a, Bignum b) {
 }
 
 std::ostream& operator<<(std::ostream& output, const Fraction& frac) {
-    if (!frac.isPositive) output << "- ";
+    std::stringstream temp;
+    if (!frac.isPositive) temp << "-";
     for (long long int i = frac.numerator.number.size() - 1; i >= 0; --i) {
-        output << frac.numerator.number[i];
+        temp << frac.numerator.number[i];
     }
-    output << "/";
-    for (long long int i = frac.denominator.number.size() - 1; i >= 0; --i) {
-        output << frac.denominator.number[i];
+
+    if (frac.denominator != Bignum("1")) {
+        temp << "/";
+        for (long long int i = frac.denominator.number.size() - 1; i >= 0; --i) {
+            temp << frac.denominator.number[i];
+        }
     }
+    output << temp.str();
     return output;
 }
 

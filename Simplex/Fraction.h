@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <iomanip>
+#include <sstream>
 #include "Bignum.h"
 
 class Fraction {
