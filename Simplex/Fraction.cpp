@@ -120,6 +120,7 @@ Fraction Fraction::operator+(Fraction& frac) {
 }
 
 Fraction Fraction::operator-(Fraction& frac) {
+    if (frac.numerator == Bignum("0")) return (*this);
     Bignum thisNum;
     Bignum thisDenom;
     Bignum fracNum;

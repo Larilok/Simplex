@@ -254,18 +254,23 @@ int Matrix::minRatioIndexInColumn(int c)
 	int row_index = -1;
 	Fraction ratio;
 	for (int i = 2; i < getHeight(); ++i) {
-		if (row_index == -1) {
-			ratio = data[i][getLength() - 1] / data[i][c] ;
-			if (ratio < ZERO) continue;						
-			row_index = i;
-		}
-		else {
-			Fraction temp = data[i][getLength() - 1] / data[i][c] ;
-			if (temp < ZERO) continue;
-			if (ratio > temp) {
-				ratio = temp;
+		try {
+			if (row_index == -1) {
+				ratio = data[i][getLength() - 1] / data[i][c];
+				if (ratio < ZERO) continue;
 				row_index = i;
 			}
+			else {
+				Fraction temp = data[i][getLength() - 1] / data[i][c];
+				if (temp < ZERO) continue;
+				if (ratio > temp) {
+					ratio = temp;
+					row_index = i;
+				}
+			}
+		}
+		catch (std::exception e) {
+			continue;
 		}
 	}
 	return row_index;
