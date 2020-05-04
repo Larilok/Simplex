@@ -195,7 +195,7 @@ Bignum Bignum::operator-(Bignum& num) {
         result.number.resize(std::fmax(this->number.size(), num.number.size()));
         if ((this->isPositive && *this < num) || (!this->isPositive && *this > num)) {
             result = num - *this;
-            result.isPositive = false;
+            result.isPositive = !result.isPositive;
             return result;
         }
         for (int i = 0; i < result.number.size(); ++i) {
