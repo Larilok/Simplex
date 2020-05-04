@@ -22,15 +22,15 @@ class Matrix
 private:
 	std::vector<std::vector<Fraction>> data;
 
-	void Str2CharPtr(System::String^ str, std::string& sstring);
 	void insert_nonbasic_variable_simplex(std::vector<size_t>& variables,
 		std::vector<size_t>& basis, 
 		Var type, std::string value,
 		size_t &current_row);
 	void swapRows(int& r1, int& r2);
 	void deleteSurplusColumn(std::size_t c);
-	int minRatioIndexInColumn(int c);
+	int minRatioIndexInColumn(int c, int restrictions_start_row);
 	int maxMinIndexInRow(int r, const bool min_max);
+	void JordanGauss_rotation(size_t column_new_basic_variable, size_t row_basic_var_to_be_del);
 public:
 	Matrix();
 	Matrix(const int& c, const int& r);
@@ -45,6 +45,7 @@ public:
 	Fraction getEquivalent(int column);
 	std::size_t getLength() const;
 	std::size_t getHeight() const;
+	static void Str2CharPtr(System::String^ str, std::string& sstring);
 
 	void simplex_solution(std::ostream& logs, const bool& min_max, std::vector<size_t>& variables, std::vector<size_t>& basis_indexes);
 	int backIter(std::vector<size_t> &where, std::vector<Fraction> &answer);

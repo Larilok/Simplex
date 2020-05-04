@@ -64,20 +64,24 @@ Matrix::Matrix(System::Windows::Forms::DataGridView^ restrictions_table,
 		data(restrictions_table->RowCount+1, std::vector<Fraction>(targetFunction->ColumnCount-1))
 {
 	std::string buffer;	//buffer to save value from input
+	size_t found; //if input is "a/b" saves '/' position
 
 	//fills first row with values of targerFunction
 	for (std::size_t i = 0; i < targetFunction->ColumnCount-1; i++)	{
 		Str2CharPtr(System::Convert::ToString(targetFunction->Rows[0]->Cells[i]->Value), buffer);
-		data[0][i] = Fraction(-Bignum(buffer), Bignum("1"));
-		if (i != targetFunction->ColumnCount - 1)
-			variables.push_back(Var::Basic);
+		found = buffer.find('/');
+		if (found != std::string::npos) data[0][i] = Fraction(-Bignum(buffer.substr(0, found)), Bignum(buffer.substr(found+1)));
+		else data[0][i] = Fraction(-Bignum(buffer), Bignum("1"));
+		variables.push_back(Var::Basic);
 	}
 	//fills rest of table
 	for (std::size_t i = 0; i < restrictions_table->RowCount; i++) {
 		//add basic variables
 		for (std::size_t j = 0; j < restrictions_table->ColumnCount-2; j++) {
 			Str2CharPtr(System::Convert::ToString(restrictions_table->Rows[i]->Cells[j]->Value), buffer);
-			data[i+1][j] = Fraction(Bignum(buffer), Bignum("1"));
+			found = buffer.find('/');
+			if (found != std::string::npos) data[i+1][i] = Fraction(-Bignum(buffer.substr(0, found)), Bignum(buffer.substr(found + 1)));
+			else data[i+1][j] = Fraction(Bignum(buffer), Bignum("1"));
 		}
 		//process comparer cell
 		 Str2CharPtr(System::Convert::ToString(
@@ -96,11 +100,15 @@ Matrix::Matrix(System::Windows::Forms::DataGridView^ restrictions_table,
 	//add b cell
 	for (std::size_t i = 0; i < restrictions_table->RowCount; i++) {
 		Str2CharPtr(System::Convert::ToString(restrictions_table->Rows[i]->Cells[restrictions_table->ColumnCount - 1]->Value), buffer);
-		data[i + 1].push_back(Fraction(Bignum(buffer), Bignum("1")));
+		found = buffer.find('/');
+		if (found != std::string::npos) data[i + 1].push_back(Fraction(-Bignum(buffer.substr(0, found)), Bignum(buffer.substr(found + 1))));
+		else data[i + 1].push_back(Fraction(Bignum(buffer), Bignum("1")));
 	}
 	// add C target function
 	Str2CharPtr(System::Convert::ToString(targetFunction->Rows[0]->Cells[targetFunction->ColumnCount - 1]->Value), buffer);
-	data[0].push_back(Fraction(Bignum(buffer), Bignum("1")));
+	found = buffer.find('/');
+	if (found != std::string::npos) data[0].push_back(Fraction(-Bignum(buffer.substr(0, found)), Bignum(buffer.substr(found + 1))));
+	else data[0].push_back(Fraction(Bignum(buffer), Bignum("1")));
 }
 
 Matrix::Matrix() : Matrix(1, 1) {}
@@ -161,17 +169,22 @@ void Matrix::simplex_solution(std::ostream& logs, const bool& min_max, std::vect
 	printSimplexMatrix(logs, *this, variables, basis_indexes);
 
 	int i, j, r;
-	size_t column_new_basic_variable, row_basic_var_to_be_del;
+	int column_new_basic_variable, row_basic_var_to_be_del;
 
-	for (size_t i = 0;true; i++)
+	for (i = 0; true; i++)
 	{
 		column_new_basic_variable = maxMinIndexInRow(0, false);
+		if (data[0][column_new_basic_variable] <= ZERO) break; //mininimized
 
-		if (data[0][column_new_basic_variable] <= ZERO) //mininimized
-			break;
-
-		row_basic_var_to_be_del = minRatioIndexInColumn(column_new_basic_variable);
-		if (row_basic_var_to_be_del < 0) break;  //completelly wrong TODO ERROR
+		row_basic_var_to_be_del = minRatioIndexInColumn(column_new_basic_variable, 2);
+		if (row_basic_var_to_be_del < 0) {
+			logs << "All ratios for unoptimal value in column "
+				<< column_new_basic_variable + 1
+				<< " are < 0\nUnbound!!!\nPlease check your input"
+				<< std::endl << std::endl;
+			printSimplexMatrix(logs, *this, variables, basis_indexes);
+			return;  //completelly wrong
+		}
 
 		logs << column_new_basic_variable+1 << "+, " << basis_indexes[row_basic_var_to_be_del - 2]+1 << "-" << std::endl << std::endl;
 		//delete Surplus var to speed up calculation
@@ -186,32 +199,23 @@ void Matrix::simplex_solution(std::ostream& logs, const bool& min_max, std::vect
 			deleteSurplusColumn(basis_indexes[row_basic_var_to_be_del - 2]);
 		}
 		basis_indexes[row_basic_var_to_be_del - 2] = column_new_basic_variable;
-		//printSimplexMatrix(logs, *this, variables, basis_indexes);
 
-		// make pivot = 1 by dividing all elements of the row
-		Fraction pivot = data[row_basic_var_to_be_del][column_new_basic_variable];
-		for (j = 0, r = row_basic_var_to_be_del; j < getLength(); ++j) {
-			data[r][j] = data[r][j] / pivot;
-		}
-		// Jorge-gauss
-		//logs << "Jordan-Gauss transformations" << std::endl << std::endl;
-		Fraction div;
-		for (i = 0; i < getHeight(); ++i) {
-			if (i != row_basic_var_to_be_del) {
-				div = data[i][column_new_basic_variable];
-				for (j = 0; j < getLength(); ++j)
-					data[i][j] = data[i][j] - (div * data[row_basic_var_to_be_del][j]);
-			}
-		}
+		JordanGauss_rotation(column_new_basic_variable, row_basic_var_to_be_del);
 		printSimplexMatrix(logs, *this, variables, basis_indexes);
 	}
 
-	if (data[0][getLength()-1] != ZERO) throw std::exception("min r result isn't `0`");
+	if (data[0][getLength() - 1] > ZERO) {
+		logs << "Min r result is optimal, but `> 0`. Surplas variables are still in basis.\nNO SOLUTION\n\n";
+		printSimplexMatrix(logs, *this, variables, basis_indexes);
+		return;
+	}
 
 	//delete stage 1 target function
 	data.erase(data.begin());
+
 	logs << "STAGE 2" << std::endl << std::endl;
 	//STAGE 2
+	printSimplexMatrix(logs, *this, variables, basis_indexes);
 	for (size_t i = 0; true; i++)
 	{
 		column_new_basic_variable = maxMinIndexInRow(0, min_max);
@@ -225,35 +229,60 @@ void Matrix::simplex_solution(std::ostream& logs, const bool& min_max, std::vect
 				break;
 		}
 		
-		row_basic_var_to_be_del = minRatioIndexInColumn(column_new_basic_variable);
-		if (row_basic_var_to_be_del < 0) break;  //completelly wrong TODO ERROR
-
-		logs << column_new_basic_variable << "+, " << basis_indexes[row_basic_var_to_be_del - 1] << "-" << std::endl << std::endl;
+		row_basic_var_to_be_del = minRatioIndexInColumn(column_new_basic_variable, 1);
+		if (row_basic_var_to_be_del < 0) {
+			logs << "All ratios for unoptimal value in column " 
+				<< column_new_basic_variable + 1 
+				<< " are < 0\nUnbound!!!\nPlease check your input"
+				<< std::endl << std::endl;
+			printSimplexMatrix(logs, *this, variables, basis_indexes);
+			return;  //completelly wrong
+		}
+		logs << column_new_basic_variable+1 << "+, " << basis_indexes[row_basic_var_to_be_del - 1]+1 << "-" << std::endl << std::endl;
 		basis_indexes[row_basic_var_to_be_del - 1] = column_new_basic_variable;
 
-		// make pivot = 1 by dividing all elements of the row
-		Fraction pivot = data[row_basic_var_to_be_del][column_new_basic_variable];
-		for (j = 0, r = row_basic_var_to_be_del; j < getLength(); ++j) {
-			data[r][j] = data[r][j] / pivot;
-		}
-		// Jorge-gauss
-		Fraction div;
-		for (i = 0; i < getHeight(); ++i) {
-			if (i != row_basic_var_to_be_del) {
-				div = data[i][column_new_basic_variable];
-				for (j = 0; j < getLength(); ++j)
-					data[i][j] = data[i][j] - (div * data[row_basic_var_to_be_del][j]);
-			}
-		}
+		JordanGauss_rotation(column_new_basic_variable, row_basic_var_to_be_del);
 		printSimplexMatrix(logs, *this, variables, basis_indexes);
 	}
+
+	//check for multiple answer if targetFunction || one of the restrictions
+	for (size_t i = 0; i < getLength(); i++)
+	{
+		//one of non-basis vars should be = 0 in solution in targetFunction
+		if (data[0][i] == ZERO) {
+			bool is_present = false;
+			for (size_t j = 0; j < basis_indexes.size(); j++) {
+				if (basis_indexes[j] == i) is_present = true;
+			}
+			if (is_present) continue;
+			logs << "Multiple optimal solution 'cos one of non-basis vars is 0" << std::endl << "Finding another edge point of the vector-solution" << std::endl << std::endl;
+			column_new_basic_variable = i;
+			//add this variable to basis to find another edge point of the vector-solution
+			row_basic_var_to_be_del = minRatioIndexInColumn(column_new_basic_variable, 1);
+			if (row_basic_var_to_be_del < 0) {
+				logs << "All ratios for unoptimal value in column "
+					<< column_new_basic_variable + 1
+					<< " are < 0\nUnbound!!!\nPlease check your input"
+					<< std::endl << std::endl;
+				printSimplexMatrix(logs, *this, variables, basis_indexes);
+				return;  //completelly wrong
+			}
+			logs << column_new_basic_variable+1 << "+, " << basis_indexes[row_basic_var_to_be_del - 1]+1 << "-" << std::endl << std::endl;
+			basis_indexes[row_basic_var_to_be_del - 1] = column_new_basic_variable;
+
+			JordanGauss_rotation(column_new_basic_variable, row_basic_var_to_be_del);
+			printSimplexMatrix(logs, *this, variables, basis_indexes);
+			break;
+		}
+	}
+	
 }
 
-int Matrix::minRatioIndexInColumn(int c)
+int Matrix::minRatioIndexInColumn(int c, int restrictions_start_row)
 {
 	int row_index = -1;
 	Fraction ratio;
-	for (int i = 2; i < getHeight(); ++i) {
+	for (int i = restrictions_start_row; i < getHeight(); ++i) {
 		try {
 			if (row_index == -1) {
 				ratio = data[i][getLength() - 1] / data[i][c];
@@ -286,10 +315,29 @@ int Matrix::maxMinIndexInRow(int r, const bool min_max)
 	}
 	if (min_max == true) {
 		for (int i = 1; i < getLength() - 1; ++i)
-			if (data[r][i] < data[r][column_index])        //selecting min in a row
+			if (data[r][column_index] > data[r][i])        //selecting min in a row
 				column_index = i;
 	}
 	return column_index;
+}
+
+void Matrix::JordanGauss_rotation(size_t column_new_basic_variable, size_t row_basic_var_to_be_del)
+{
+	size_t i, j, r;
+	// make pivot = 1 by dividing all elements of the row
+	Fraction pivot = data[row_basic_var_to_be_del][column_new_basic_variable];
+	for (size_t j = 0, r = row_basic_var_to_be_del; j < getLength(); ++j) {
+		data[r][j] = data[r][j] / pivot;
+	}
+	// Jorge-gauss
+	Fraction div;
+	for (i = 0; i < getHeight(); ++i) {
+		if (i != row_basic_var_to_be_del) {
+			div = data[i][column_new_basic_variable];
+			for (j = 0; j < getLength(); ++j)
+				data[i][j] = data[i][j] - (div * data[row_basic_var_to_be_del][j]);
+		}
+	}
 }
 
 int Matrix::backIter(std::vector<size_t>& where, std::vector<Fraction>& answer) {

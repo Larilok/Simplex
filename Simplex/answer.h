@@ -49,22 +49,6 @@ namespace Simplex {
 				const std::string& tmp = logs.str();
 				const char* cstr = tmp.c_str();
 				RTB->Text += gcnew System::String(cstr);
-				//std::vector<Fraction> answer;
-				//int type = m.backIter(basis_indexes ,answer);
-				//int counter = 0;
-				//if (type == 2) {
-				//	std::vector<int> emptyIndexesHolder;
-				//	for (int i = 0; i < answer.size(); i++) {
-				//		if (where[i] == -1) RTB->Text += "x(" + Convert::ToString(++counter) + ") = " + "arbitrary real number\n";
-				//		else RTB->Text += "x(" + Convert::ToString(++counter) + ") = " + Convert::ToString(answer[i]) + "\n";
-				//	}
-				//}
-				//else if (type) {
-				//	for (auto el : answer) {
-				//		RTB->Text += "x(" + Convert::ToString(++counter) + ") = " + Convert::ToString(el) + "\n";
-				//	}
-				//}
-				//else RTB->Text = "You're a DARK MAGE, how in the world you broke my program";
 			}
 			catch (std::exception e) {
 				RTB->Text = Convert::ToString(e.what());
@@ -72,15 +56,9 @@ namespace Simplex {
 			catch (...) {
 				RTB->Text = "Unexpected error";
 			}
-			//
-			//TODO: Add the constructor code here
-			//
 		}
 
 	protected:
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
 		~Answer()
 		{
 			if (components)
@@ -90,16 +68,9 @@ namespace Simplex {
 		}
 	private: System::Windows::Forms::RichTextBox^  RTB;
 	private:
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
 		System::ComponentModel::Container ^components;
 
 #pragma region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
 		void InitializeComponent(void)
 		{
 			this->RTB = (gcnew System::Windows::Forms::RichTextBox());
@@ -144,7 +115,7 @@ namespace Simplex {
 					this->saveToFileToolStripMenuItem
 			});
 			this->menuToolStripMenuItem->Name = L"menuToolStripMenuItem";
-			this->menuToolStripMenuItem->Size = System::Drawing::Size(50, 22);
+			this->menuToolStripMenuItem->Size = System::Drawing::Size(50, 20);
 			this->menuToolStripMenuItem->Text = L"Menu";
 			// 
 			// infoToolStripMenuItem
@@ -176,7 +147,7 @@ namespace Simplex {
 			this->MinimizeBox = false;
 			this->MinimumSize = System::Drawing::Size(800, 600);
 			this->Name = L"Answer";
-			this->Text = L"Solution";
+			this->Text = L"SimplexSolution";
 			this->menuStrip1->ResumeLayout(false);
 			this->menuStrip1->PerformLayout();
 			this->ResumeLayout(false);
@@ -191,32 +162,20 @@ private: System::Void infoToolStripMenuItem_Click(System::Object^  sender, Syste
 	info->ShowDialog();
 }
 private: System::Void saveToFileToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e) {
-	/*std::ofstream out;
-	char outputFile[20];
-	Str2CharPtr(this->Text, outputFile);
-	
-	Matrix m(matrix->RowCount, matrix->ColumnCount - 1);
-	m.copy(matrix);
+	std::ofstream out;	
+	std::string answer, outFile;
+	std::ostringstream oss;
 
-	int index;
-	if (strcmp(outputFile,"Gauss")) {
-		index = ++GaussAm;
-	}
-	else if (strcmp(outputFile, "Gauss_Jordan")) {
-		index = ++Jorge_GaussAm;
-	}
-	else index = ++Givens_Rotation;
+	auto t = std::time(nullptr);
+	auto tm = *std::localtime(&t);
+	oss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
+	auto str = oss.str();
 
-	char answer[256];
-	std::string outFile(outputFile);
+	Matrix::Str2CharPtr(this->Text, outFile);
+	Matrix::Str2CharPtr(this->RTB->Text, answer);
 
-	std::string s;
-	std::stringstream outt;
-	outt << index;
-	s = outt.str();
-	out.open(outFile+ "("+ s +")"+".txt", std::fstream::out);
-	Str2CharPtr(this->RTB->Text, answer);
-	out << "FINAL MATRIX\n" << m <<"\n Answer\n"<< answer;*/
+	out.open(outFile+ "("+ str +")"+".txt", std::fstream::out);
+	out << answer;
 }
 };
 }

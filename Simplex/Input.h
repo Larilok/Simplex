@@ -21,15 +21,9 @@ namespace Simplex {
 		Input(void)
 		{
 			InitializeComponent();
-			//
-			//TODO: Add the constructor code here
-			//
 		}
 
 	protected:
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
 		~Input()
 		{
 			if (components)
@@ -44,9 +38,6 @@ namespace Simplex {
 	private: System::Windows::Forms::ToolStripMenuItem^ infoToolStripMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^ aboutToolStripMenuItem;
 
-
-
-
 	private: System::Windows::Forms::NumericUpDown^ VariablesNum;
 	private: System::Windows::Forms::NumericUpDown^ RestrictionsNum;
 	private: System::Windows::Forms::Label^ label3;
@@ -58,17 +49,11 @@ namespace Simplex {
 
 	private: System::Windows::Forms::RadioButton^ max_b;
 
-
-
 	private: System::Windows::Forms::Label^ label4;
 
 	private: System::ComponentModel::IContainer^ components;
 
 #pragma region Windows Form Designer generated code
-		   /// <summary>
-		   /// Required method for Designer support - do not modify
-		   /// the contents of this method with the code editor.
-		   /// </summary>
 		   void InitializeComponent(void)
 		   {
 			   System::ComponentModel::ComponentResourceManager^ resources = (gcnew System::ComponentModel::ComponentResourceManager(Input::typeid));
@@ -139,7 +124,7 @@ namespace Simplex {
 			   this->restrictions_table->RowTemplate->Height = 28;
 			   this->restrictions_table->SelectionMode = System::Windows::Forms::DataGridViewSelectionMode::CellSelect;
 			   this->restrictions_table->StandardTab = true;
-			   this->restrictions_table->CellEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Input::restrictions_table_CellEnter);
+			   this->restrictions_table->CellValidating += gcnew System::Windows::Forms::DataGridViewCellValidatingEventHandler(this, &Input::restrictions_table_CellValidating);
 			   // 
 			   // label2
 			   // 
@@ -216,7 +201,7 @@ namespace Simplex {
 			   this->targetFunction->RowHeadersVisible = false;
 			   this->targetFunction->RowTemplate->Height = 28;
 			   this->targetFunction->StandardTab = true;
-			   this->targetFunction->CellEnter += gcnew System::Windows::Forms::DataGridViewCellEventHandler(this, &Input::restrictions_table_CellEnter);
+			   this->targetFunction->CellValidating += gcnew System::Windows::Forms::DataGridViewCellValidatingEventHandler(this, &Input::targetFunction_CellValidating);
 			   // 
 			   // groupBox2
 			   // 
@@ -309,7 +294,6 @@ namespace Simplex {
 			restrictions_table->Rows[i]->Cells[restrictions_table->ColumnCount - 2]->Value = "<=";
 		}
 		
-
 		restrictions_table->AutoResizeColumns();	//выравнивание ячеек
 		targetFunction->AutoResizeColumns();
 		restrictions_table->AutoResizeRows();
@@ -325,18 +309,22 @@ namespace Simplex {
 		int lastValue = (o->Tag == nullptr) ? 0 : (int)o->Tag;
 		o->Tag = thisValue;
 
-		if (thisValue < lastValue) {
-			restrictions_table->Columns->RemoveAt(lastValue - 1);
-			targetFunction->Columns->RemoveAt(lastValue - 1);
-		}
+		if (lastValue > thisValue)
+			for (size_t i = 0; i < lastValue - thisValue; i++)
+			{
+				restrictions_table->Columns->RemoveAt(lastValue - 1 - i);
+				targetFunction->Columns->RemoveAt(lastValue - 1 - i);
+			}
 		else {
-			DataGridViewTextBoxColumn^ c = gcnew DataGridViewTextBoxColumn();
-			DataGridViewTextBoxColumn^ d = gcnew DataGridViewTextBoxColumn();
-			//c->HeaderText = "x(" + Convert::ToString(thisValue) + ")";
-			c->Name = "x(" + Convert::ToString(thisValue) + ")";
-			d->Name = "x(" + Convert::ToString(thisValue) + ")";
-			restrictions_table->Columns->Insert(lastValue, c);
-			targetFunction->Columns->Insert(lastValue, d);
+			DataGridViewTextBoxColumn^ c,^ d;
+			for (size_t i = 1; i < (thisValue - lastValue) +1; i++) {
+				c = gcnew DataGridViewTextBoxColumn();
+				d = gcnew DataGridViewTextBoxColumn();
+				c->Name = "x(" + Convert::ToString(lastValue + i) + ")";
+				d->Name = "x(" + Convert::ToString(lastValue + i) + ")";
+				restrictions_table->Columns->Insert(lastValue + i -1, c);
+				targetFunction->Columns->Insert(lastValue+ i- 1, d);
+			}
 		}
 
 		restrictions_table->AutoResizeColumns();	//выравнивание ячеек
@@ -349,25 +337,52 @@ namespace Simplex {
 		int lastValue = (o->Tag == nullptr) ? 0 : (int)o->Tag;
 		o->Tag = thisValue;
 
-		if (thisValue < lastValue) {
-			restrictions_table->Rows->RemoveAt(lastValue - 1);
-			
-		}
+		if (lastValue > thisValue)
+			for (size_t i = 0; i < lastValue - thisValue; i++)
+				restrictions_table->Rows->RemoveAt(lastValue - 1 - i);
 		else {
-			DataGridViewRow^ c = gcnew DataGridViewRow();
-			restrictions_table->Rows->Insert(lastValue, c);
+			DataGridViewRow^ c;
+			for (size_t i = 1; i < (thisValue - lastValue) + 1; i++) {
+				c = gcnew DataGridViewRow();
+				restrictions_table->Rows->Insert(lastValue, c);
+				if (restrictions_table->ColumnCount - 2 > 0) restrictions_table->Rows[lastValue]->Cells[restrictions_table->ColumnCount - 2]->Value = "<=";
+			}
 		}
 
 		restrictions_table->AutoResizeRows();	//выравнивание ячеек
 		targetFunction->AutoResizeRows();	//выравнивание ячеек
 	}
 
-	private: System::Void restrictions_table_CellEnter(System::Object^ sender, System::Windows::Forms::DataGridViewCellEventArgs^ e) {
-		restrictions_table->AutoResizeColumns();
-	}
-
 
 	private: System::Void button1_Click(System::Object^ sender, System::EventArgs^ e) {
+		std::string buffer;
+		for (size_t i = 0; i < restrictions_table->RowCount; i++)
+		{
+			Matrix::Str2CharPtr(System::Convert::ToString(restrictions_table->Rows[i]->Cells[restrictions_table->ColumnCount - 1]->Value), buffer);
+			if (buffer[0] == '-') {
+				buffer.erase(buffer.begin());
+				String^ a = gcnew String(buffer.c_str());
+				restrictions_table->Rows[i]->Cells[restrictions_table->ColumnCount - 1]->Value = a;
+				for (std::size_t j = 0; j < restrictions_table->ColumnCount - 2; j++) {
+					Matrix::Str2CharPtr(System::Convert::ToString(restrictions_table->Rows[i]->Cells[j]->Value), buffer);
+					if (buffer[0] == '-') {
+						buffer.erase(buffer.begin());
+						restrictions_table->Rows[i]->Cells[j]->Value = gcnew String(buffer.c_str());
+					}
+					else {
+						buffer.insert(buffer.begin(), '-');
+						restrictions_table->Rows[i]->Cells[j]->Value = gcnew String(buffer.c_str());
+					}
+				}
+				Matrix::Str2CharPtr(System::Convert::ToString(restrictions_table->Rows[i]->Cells[restrictions_table->ColumnCount - 2]->Value), buffer);
+				if (buffer == "<=")
+					restrictions_table->Rows[i]->Cells[restrictions_table->ColumnCount - 2]->Value = gcnew String(">=");
+
+				if (buffer == ">=")
+					restrictions_table->Rows[i]->Cells[restrictions_table->ColumnCount - 2]->Value = gcnew String("<=");
+			}
+			
+		}
 		std::vector<size_t> variables;
 		std::vector<size_t> basis_index;
 		std::stringstream logs;
@@ -383,27 +398,44 @@ namespace Simplex {
 		ans->Show();
 
 	}
-		   //private: System::Void restrictions_table_CellValidating(System::Object^  sender, System::Windows::Forms::DataGridViewCellValidatingEventArgs^  e) {
-		   //	DataGridView^ view = (DataGridView^)sender;
-		   //	//view->Rows[e->RowIndex]->ErrorText = " ";
-		   //	double newInteger;
-		   //
-		   //	if (restrictions_table->Rows[e->RowIndex]->IsNewRow)
-		   //	{
-		   //		return;
-		   //	}
-		   //	if (!Double::TryParse(e->FormattedValue->ToString(),newInteger))
-		   //	{
-		   //		MessageBox::Show("Please, check your input");
-		   //		//view->Rows[e->RowIndex]->ErrorText = "the value must be a non-negative integer";
-		   //		e->Cancel = true;
-		   //
-		   //	}
-		   //}
+
+	private: System::Void restrictions_table_CellValidating(System::Object^  sender, System::Windows::Forms::DataGridViewCellValidatingEventArgs^  e) {
+		if (restrictions_table->Rows[e->RowIndex]->IsNewRow) return;
+		if (e->ColumnIndex == restrictions_table->ColumnCount - 2) return;
+		if (e->FormattedValue->ToString() == "") return;
+
+		std::string buffer;
+		Matrix::Str2CharPtr(System::Convert::ToString(e->FormattedValue), buffer);
+		for (size_t i = 0; i < buffer.size(); ++i) {
+			if (i != 0 && (buffer[i] - 48) > 9 && buffer[i] != '/' || i == 0 && (buffer[i] - 48) > 9 && buffer[i] != '-')
+			{
+				MessageBox::Show("Please, check your input");
+				e->Cancel = true;
+				break;
+			}
+		}
+	}
+
+	private: System::Void targetFunction_CellValidating(System::Object^ sender, System::Windows::Forms::DataGridViewCellValidatingEventArgs^ e) {
+		if (targetFunction->Rows[e->RowIndex]->IsNewRow) return;
+		if (e->FormattedValue->ToString() == "") return;
+
+		std::string buffer;
+		Matrix::Str2CharPtr(System::Convert::ToString(e->FormattedValue), buffer);
+		for (size_t i = 0; i < buffer.size(); ++i) {
+			if (i != 0 && (buffer[i] - 48) > 9 && buffer[i] != '/' || i == 0 && (buffer[i] - 48) > 9 && buffer[i] != '-')
+			{
+				MessageBox::Show("Please, check your input");
+				e->Cancel = true;
+				break;
+			}
+		}
+	}
+
 	private: System::Void aboutToolStripMenuItem_Click(System::Object^ sender, System::EventArgs^ e) {
 		about^ info = gcnew about();
 		info->ShowDialog();
 	}
 
-	};
+};
 }
