@@ -136,7 +136,7 @@ Fraction Fraction::operator-(Fraction& frac) {
     }
     Bignum numer;
     numer = thisNum - fracNum;
-    if (!numer.isPositive && !this->isPositive) numer.isPositive = !numer.isPositive;
+    if (numer == Bignum("0")) numer.isPositive = true;
     return Fraction(numer, thisDenom);
 }
 
