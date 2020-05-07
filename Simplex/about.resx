@@ -119,11 +119,12 @@
   </resheader>
   <data name="richTextBox1.Text" xml:space="preserve">
     <value>Hi buddy,
-This program supports multi window solution viewing and can save results into text file like **nameOfMethod(num).txt** in curent directory.
+This program supports multi window solution viewing and can save results into text file like **result(date).txt** in curent directory. Use two-phase simplex method.
 
 ----------INPUT------------
 x(1)...x(n) is your coefs next to unknowns.
 b(1)...b(n) is  the right part of the equantion.
+c is the number if present in target function.
 
 Take luck and be happy.
 P.S. Don't forget to close this window to start the program</value>

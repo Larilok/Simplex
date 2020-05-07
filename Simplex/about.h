@@ -50,7 +50,7 @@ namespace Simplex {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(about::typeid));
+			System::ComponentModel::ComponentResourceManager^ resources = (gcnew System::ComponentModel::ComponentResourceManager(about::typeid));
 			this->richTextBox1 = (gcnew System::Windows::Forms::RichTextBox());
 			this->SuspendLayout();
 			// 
@@ -60,20 +60,22 @@ namespace Simplex {
 			this->richTextBox1->BorderStyle = System::Windows::Forms::BorderStyle::None;
 			this->richTextBox1->Font = (gcnew System::Drawing::Font(L"Ink Free", 13, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->richTextBox1->Location = System::Drawing::Point(48, 12);
+			this->richTextBox1->Location = System::Drawing::Point(32, 8);
+			this->richTextBox1->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
 			this->richTextBox1->Name = L"richTextBox1";
 			this->richTextBox1->ReadOnly = true;
-			this->richTextBox1->Size = System::Drawing::Size(811, 384);
+			this->richTextBox1->Size = System::Drawing::Size(541, 250);
 			this->richTextBox1->TabIndex = 0;
 			this->richTextBox1->Text = resources->GetString(L"richTextBox1.Text");
 			// 
 			// about
 			// 
-			this->AutoScaleDimensions = System::Drawing::SizeF(9, 20);
+			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackColor = System::Drawing::SystemColors::Info;
-			this->ClientSize = System::Drawing::Size(909, 419);
+			this->ClientSize = System::Drawing::Size(606, 272);
 			this->Controls->Add(this->richTextBox1);
+			this->Margin = System::Windows::Forms::Padding(2, 2, 2, 2);
 			this->MaximizeBox = false;
 			this->MinimizeBox = false;
 			this->Name = L"about";

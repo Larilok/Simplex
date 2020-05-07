@@ -87,7 +87,7 @@ namespace Simplex {
 			   // 
 			   resources->ApplyResources(this->VariablesNum, L"VariablesNum");
 			   this->VariablesNum->BackColor = System::Drawing::SystemColors::InactiveCaption;
-			   this->VariablesNum->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 20, 0, 0, 0 });
+			   this->VariablesNum->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 100, 0, 0, 0 });
 			   this->VariablesNum->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 0 });
 			   this->VariablesNum->Name = L"VariablesNum";
 			   this->VariablesNum->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 0 });
@@ -164,7 +164,7 @@ namespace Simplex {
 			   // 
 			   resources->ApplyResources(this->RestrictionsNum, L"RestrictionsNum");
 			   this->RestrictionsNum->BackColor = System::Drawing::SystemColors::InactiveCaption;
-			   this->RestrictionsNum->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 20, 0, 0, 0 });
+			   this->RestrictionsNum->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 50, 0, 0, 0 });
 			   this->RestrictionsNum->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 0 });
 			   this->RestrictionsNum->Name = L"RestrictionsNum";
 			   this->RestrictionsNum->Value = System::Decimal(gcnew cli::array< System::Int32 >(4) { 1, 0, 0, 0 });
