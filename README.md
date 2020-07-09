@@ -4,14 +4,18 @@ Two-Phase Simplex method to solve integer linear programming problems
 
 FEATURES
 --------
-Values:
+__Values:__
 * Long integers
 * Fractions
 
-Proсessed specific cases:
+__Proсessed specific cases of the problem:__
 * Alternative optimal solutions
 * Unlimited space of solutions
 * No allowable solution
+
+__Additional:__
+* About window
+* Save result to file
 
 INTERFACE
 ---------
