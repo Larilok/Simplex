@@ -15,7 +15,7 @@ __Proсessed specific cases of the problem:__
 
 __Additional:__
 * "About" window
-* Save a result to file
+* Save a result to a file
 
 INTERFACE
 ---------
