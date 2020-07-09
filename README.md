@@ -14,7 +14,7 @@ __Proсessed specific cases of the problem:__
 * No allowable solution
 
 __Additional:__
-* About window
+* "About" window
 * Save result to file
 
 INTERFACE
